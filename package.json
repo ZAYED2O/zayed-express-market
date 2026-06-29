@@ -1,0 +1,9 @@
+{
+  "name": "zayed-express-market",
+  "version": "1.0.0",
+  "description": "Root package.json to deploy Zayed Express backend to Glitch/Render",
+  "scripts": {
+    "start": "cd server && node server.js",
+    "install": "cd server && npm install"
+  }
+}
