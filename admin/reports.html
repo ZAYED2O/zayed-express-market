@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | التقارير والأداء</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/admin-style.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="admin-header">
+    <div class="logo-area">
+      <a href="index.html" class="logo">
+        ZAYED<span>EXPRESS</span>
+      </a>
+      <span class="logo-badge">SELLER CENTRAL</span>
+    </div>
+    
+    <div class="search-bar">
+      <select>
+        <option>التقارير</option>
+      </select>
+      <input type="text" placeholder="البحث في التقارير...">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+    
+    <div class="header-actions">
+      <a href="../index.html" class="action-item" style="color: var(--admin-primary);">
+        <i class="fas fa-store"></i>
+        <span>المتجر</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sub Header (Menu) -->
+  <div class="admin-subheader">
+    <ul class="admin-menu">
+      <li><a href="index.html">لوحة القياس</a></li>
+      <li><a href="inventory.html">إدارة المخزون</a></li>
+      <li><a href="orders.html">إدارة الطلبات</a></li>
+      <li><a href="#">الإعلانات</a></li>
+      <li><a href="reports.html" class="active">التقارير</a></li>
+      <li><a href="#">الأداء</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <div class="page-title">
+      تقارير المبيعات والأداء
+      <div>
+        <button class="btn"><i class="fas fa-download"></i> تصدير التقرير (CSV)</button>
+      </div>
+    </div>
+    
+    <div class="widgets-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="widget">
+        <div class="widget-header">إجمالي الإيرادات (آخر 7 أيام)</div>
+        <div class="widget-value en-text text-primary">24,500 د.إ</div>
+        <div class="widget-desc">بزيادة <span class="en-text" style="color: var(--admin-success);">+8.4%</span> عن الأسبوع الماضي</div>
+      </div>
+      <div class="widget">
+        <div class="widget-header">معدل التحويل (Conversion Rate)</div>
+        <div class="widget-value en-text">3.2%</div>
+        <div class="widget-desc">من إجمالي الزوار إلى مشترين</div>
+      </div>
+      <div class="widget">
+        <div class="widget-header">متوسط قيمة الطلب</div>
+        <div class="widget-value en-text">450 د.إ</div>
+        <div class="widget-desc">ثابت مقارنة بالشهر الماضي</div>
+      </div>
+    </div>
+    
+    <!-- Chart Section -->
+    <div class="widget" style="margin-bottom: 2rem;">
+      <div class="widget-header">أداء المبيعات (آخر 7 أيام)</div>
+      <div style="height: 400px; width: 100%;">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+    
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      
+      // Chart.js global defaults for dark theme
+      Chart.defaults.color = '#9E86B8';
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'],
+          datasets: [{
+            label: 'المبيعات (د.إ)',
+            data: [2100, 3400, 2800, 4500, 3900, 5200, 2600],
+            borderColor: '#7b2cbf',
+            backgroundColor: 'rgba(123, 44, 191, 0.2)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#e0aaff',
+            pointBorderColor: '#fff',
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: '#150624',
+              titleColor: '#e0aaff',
+              bodyColor: '#fff',
+              borderColor: '#2D1445',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)',
+                drawBorder: false
+              },
+              ticks: {
+                callback: function(value) {
+                  return value + ' د.إ';
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false,
+                drawBorder: false
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

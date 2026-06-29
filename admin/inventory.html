@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | إدارة المخزون</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/admin-style.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="admin-header">
+    <div class="logo-area">
+      <a href="index.html" class="logo">
+        ZAYED<span>EXPRESS</span>
+      </a>
+      <span class="logo-badge">SELLER CENTRAL</span>
+    </div>
+    
+    <div class="search-bar">
+      <select>
+        <option>المنتجات</option>
+      </select>
+      <input type="text" id="inventory-search" placeholder="ابحث باستخدام اسم المنتج أو ASIN أو SKU...">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+    
+    <div class="header-actions">
+      <a href="../index.html" class="action-item" style="color: var(--admin-primary);">
+        <i class="fas fa-store"></i>
+        <span>المتجر</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sub Header (Menu) -->
+  <div class="admin-subheader">
+    <ul class="admin-menu">
+      <li><a href="index.html">لوحة القياس</a></li>
+      <li><a href="inventory.html" class="active">إدارة المخزون</a></li>
+      <li><a href="orders.html">إدارة الطلبات</a></li>
+      <li><a href="#">الإعلانات</a></li>
+      <li><a href="reports.html">التقارير</a></li>
+      <li><a href="#">الأداء</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <div class="page-title">
+      إدارة المخزون
+      <div>
+        <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> إضافة منتج جديد</button>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <div style="padding: 1rem; border-bottom: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; background: var(--admin-bg);">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <select class="form-control" style="width: auto;" id="filter-status">
+            <option value="all">كل الحالات</option>
+            <option value="active">نشط</option>
+            <option value="inactive">غير نشط</option>
+          </select>
+          <span class="en-text text-muted" id="item-count">0 items</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn"><i class="fas fa-filter"></i> الفلاتر</button>
+          <button class="btn"><i class="fas fa-download"></i> تصدير</button>
+        </div>
+      </div>
+      
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;"><input type="checkbox"></th>
+            <th>الصورة</th>
+            <th>الاسم والوصف (ASIN/SKU)</th>
+            <th>التوفر</th>
+            <th>السعر + الشحن</th>
+            <th>الفئة</th>
+            <th>الإجراء</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-list">
+          <!-- Injected via JS -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="product-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">إضافة منتج جديد</h3>
+        <button class="btn" onclick="closeProductModal()" style="padding: 0.25rem 0.5rem; background: transparent; border: none; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="product-form">
+          <input type="hidden" id="p-id">
+          
+          <div class="form-group">
+            <label class="form-label">اسم المنتج (Title)</label>
+            <input type="text" id="p-name" class="form-control" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">رابط الصورة (Image URL)</label>
+            <input type="url" id="p-image" class="form-control" placeholder="https://..." required>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">السعر (Price)</label>
+              <input type="number" id="p-price" class="form-control" required min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">السعر القديم / القائمة</label>
+              <input type="number" id="p-old-price" class="form-control" min="0">
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">الفئة (Category)</label>
+              <select id="p-category" class="form-control" required>
+                <option value="electronics">إلكترونيات</option>
+                <option value="fashion">أزياء</option>
+                <option value="home">المنزل</option>
+                <option value="beauty">عطور وتجميل</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">شارة ترويجية (Badge)</label>
+              <input type="text" id="p-badge" class="form-control" placeholder="مثال: خصم 20%">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الوصف التفصيلي (Description)</label>
+            <textarea id="p-desc" class="form-control" rows="4" required></textarea>
+          </div>
+          
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeProductModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="saveProduct()">حفظ ومتابعة</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="js/admin-app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderInventory();
+      
+      document.getElementById('inventory-search').addEventListener('keyup', (e) => {
+        renderInventory(e.target.value);
+      });
+    });
+  </script>
+</body>
+</html>

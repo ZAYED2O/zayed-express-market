@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | إتمام الشراء</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .checkout-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+    }
+    
+    .checkout-form {
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 2.5rem;
+    }
+    
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .step-num {
+      width: 35px;
+      height: 35px;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: var(--radius-round);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    .payment-methods {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .payment-card {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+    
+    .payment-card:hover {
+      border-color: var(--color-primary);
+      background: rgba(240, 140, 0, 0.05);
+    }
+    
+    .payment-card.active {
+      border-color: var(--color-primary);
+      background: rgba(240, 140, 0, 0.1);
+    }
+    
+    .payment-card i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--color-primary);
+    }
+    
+    .checkout-summary {
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      position: sticky;
+      top: 100px;
+    }
+    
+    /* Success Modal */
+    .success-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    
+    .success-modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    .success-content {
+      background: var(--color-card);
+      padding: 4rem;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      max-width: 500px;
+      transform: scale(0.8);
+      transition: all 0.3s ease;
+    }
+    
+    .success-modal.active .success-content {
+      transform: scale(1);
+    }
+    
+    .success-icon {
+      font-size: 5rem;
+      color: var(--color-success);
+      margin-bottom: 1.5rem;
+    }
+    
+    @media(max-width: 992px) {
+      .checkout-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="main-nav">
+      <div class="container nav-container" style="justify-content: center;">
+        <a href="index.html" class="logo">ZAYED<span>EXPRESS</span> <span style="font-size: 1rem; color: var(--color-text-muted); font-weight: normal;">| الدفع الآمن</span></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container mb-xxl">
+    <div class="checkout-layout">
+      
+      <div class="checkout-form">
+        <form id="checkout-form">
+          <!-- Step 1: Address -->
+          <div class="step-title">
+            <div class="step-num">1</div>
+            <h2>عنوان التوصيل</h2>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-md">
+            <div class="form-group">
+              <label class="form-label">الاسم الأول</label>
+              <input type="text" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">اسم العائلة</label>
+              <input type="text" class="form-control" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف</label>
+            <input type="tel" class="form-control text-right" dir="ltr" placeholder="+971 XX XXX XXXX" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">المدينة / الإمارة</label>
+            <select class="form-control" required>
+              <option value="dubai">دبي</option>
+              <option value="abudhabi">أبوظبي</option>
+              <option value="sharjah">الشارقة</option>
+              <option value="ajman">عجمان</option>
+            </select>
+          </div>
+          
+          <div class="form-group mb-xl">
+            <label class="form-label">العنوان التفصيلي</label>
+            <textarea class="form-control" rows="3" required placeholder="الشارع، البناية، رقم الشقة..."></textarea>
+          </div>
+          
+          <!-- Step 2: Payment -->
+          <div class="step-title">
+            <div class="step-num">2</div>
+            <h2>طريقة الدفع</h2>
+          </div>
+          
+          <div class="payment-methods">
+            <div class="payment-card active" onclick="selectPayment(this)">
+              <i class="far fa-credit-card"></i>
+              <h4>بطاقة ائتمان</h4>
+            </div>
+            <div class="payment-card" onclick="selectPayment(this)">
+              <i class="fas fa-hand-holding-usd"></i>
+              <h4>الدفع عند الاستلام</h4>
+            </div>
+          </div>
+          
+          <div id="credit-card-form">
+            <div class="form-group">
+              <label class="form-label">رقم البطاقة</label>
+              <input type="text" class="form-control text-right en-text" dir="ltr" placeholder="XXXX XXXX XXXX XXXX">
+            </div>
+            <div class="grid grid-cols-2 gap-md">
+              <div class="form-group">
+                <label class="form-label">تاريخ الانتهاء</label>
+                <input type="text" class="form-control text-right en-text" dir="ltr" placeholder="MM/YY">
+              </div>
+              <div class="form-group">
+                <label class="form-label">CVV</label>
+                <input type="password" class="form-control text-right en-text" dir="ltr" placeholder="123">
+              </div>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-block" style="font-size: 1.2rem; padding: 1rem; margin-top: 2rem;">تأكيد الطلب</button>
+        </form>
+      </div>
+      
+      <!-- Summary -->
+      <div>
+        <div class="checkout-summary">
+          <h3 class="mb-lg">ملخص الطلب النهائي</h3>
+          <div id="checkout-items" style="margin-bottom: 2rem;">
+            <!-- Loaded by JS -->
+          </div>
+          
+          <div style="border-top: 1px solid var(--color-border); padding-top: 1.5rem; margin-top: 1.5rem;">
+            <div class="flex justify-between items-center mb-sm">
+              <span>الإجمالي المطلوب:</span>
+              <span class="en-text text-primary" style="font-size: 1.5rem; font-weight: bold;" id="checkout-total">0 د.إ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="success-modal" id="success-modal">
+    <div class="success-content">
+      <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+      <h2 style="color: #fff; margin-bottom: 1rem;">تم تأكيد طلبك بنجاح!</h2>
+      <p class="text-muted mb-xl">شكراً لتسوقك من ZAYED EXPRESS. رقم طلبك هو <span class="en-text" id="order-id">#ZE12345</span></p>
+      <a href="index.html" class="btn btn-primary btn-block">العودة للرئيسية</a>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load cart items
+      const cart = db.getCart();
+      if(cart.length === 0) {
+        window.location.href = 'cart.html';
+        return;
+      }
+      
+      const itemsContainer = document.getElementById('checkout-items');
+      let html = '';
+      cart.forEach(item => {
+        html += `
+          <div class="flex justify-between items-center mb-sm">
+            <span style="font-size: 0.9rem;">${item.quantity}x ${item.name.substring(0, 20)}...</span>
+            <span class="en-text text-muted">${(item.price * item.quantity)} د.إ</span>
+          </div>
+        `;
+      });
+      itemsContainer.innerHTML = html;
+      
+      const total = localStorage.getItem('ze_checkout_total') || db.getCartTotal();
+      document.getElementById('checkout-total').innerText = `${total} د.إ`;
+    });
+    
+    function selectPayment(element) {
+      document.querySelectorAll('.payment-card').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+      
+      const isCard = element.querySelector('h4').innerText.includes('بطاقة');
+      document.getElementById('credit-card-form').style.display = isCard ? 'block' : 'none';
+    }
+    
+    document.getElementById('checkout-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Save order to Real SQLite DB
+      const orderId = 'ZE' + Math.floor(Math.random() * 1000000);
+      const newOrder = {
+        id: orderId,
+        date: new Date().toISOString(),
+        total: parseFloat(localStorage.getItem('ze_checkout_total')),
+        items: db.getCart(),
+        status: 'قيد المعالجة'
+      };
+      db.addOrder(newOrder);
+      
+      // Show success
+      document.getElementById('order-id').innerText = '#' + orderId;
+      document.getElementById('success-modal').classList.add('active');
+      
+      // Clear Cart
+      db.clearCart();
+    });
+  </script>
+</body>
+</html>

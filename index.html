@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | الوجهة الأولى للتسوق</title>
+  
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <style>
+    /* Home Specific Styles */
+    .hero {
+      position: relative;
+      height: 500px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(to right, #0F0F1A 20%, transparent 80%), url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1500&q=80') center/cover;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 15, 26, 0.4);
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      max-width: 600px;
+    }
+    
+    .hero-content h1 {
+      font-size: 3.5rem;
+      color: #fff;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    
+    .hero-content h1 span {
+      color: var(--color-primary);
+    }
+    
+    .hero-content p {
+      font-size: 1.2rem;
+      color: var(--color-text-muted);
+      margin-bottom: 2rem;
+    }
+    
+    .categories-wrap {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.5rem;
+      margin-top: -50px;
+      position: relative;
+      z-index: 20;
+    }
+    
+    .category-card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      text-align: center;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .category-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .category-icon {
+      font-size: 2.5rem;
+      color: var(--color-primary);
+      margin-bottom: 1rem;
+    }
+    
+    .promo-banner {
+      background: linear-gradient(45deg, var(--color-primary), #FF5722);
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+    }
+    
+    .promo-text h2 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="container flex justify-between items-center wrap">
+      <div>شحن مجاني للطلبات فوق 200 د.إ</div>
+      <div class="flex gap-md">
+        <a href="#"><i class="fas fa-globe"></i> العربية</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header / Navbar -->
+  <header class="header">
+    <div class="main-nav">
+      <div class="container nav-container">
+        <a href="index.html" class="logo">ZAYED<span>EXPRESS</span></a>
+        
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="عن ماذا تبحث؟ (هواتف، ملابس، عطور...)">
+          <button class="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+        
+        <div class="nav-actions">
+          <a href="auth.html" class="action-item">
+            <i class="far fa-user"></i>
+            <span>حسابي</span>
+          </a>
+          <a href="#" class="action-item">
+            <i class="far fa-heart"></i>
+            <span>المفضلة</span>
+          </a>
+          <a href="cart.html" class="action-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>السلة</span>
+            <div class="badge" id="cart-count">0</div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="container">
+        <ul>
+          <li><a href="products.html">تصفح الكل</a></li>
+          <li><a href="products.html?cat=electronics" class="text-primary">إلكترونيات</a></li>
+          <li><a href="products.html?cat=fashion">أزياء</a></li>
+          <li><a href="products.html?cat=home">المنزل</a></li>
+          <li><a href="products.html?cat=beauty">تجميل وعطور</a></li>
+          <li><a href="#" class="text-danger"><i class="fas fa-tag"></i> عروض اليوم</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>تجربة تسوق <span>لا مثيل لها</span></h1>
+        <p>اكتشف آلاف المنتجات من أفضل الماركات العالمية بأسعار تنافسية وتوصيل سريع.</p>
+        <a href="products.html" class="btn btn-primary">تسوق الآن <i class="fas fa-arrow-left"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <div class="container">
+    <div class="categories-wrap">
+      <a href="products.html?cat=electronics" class="category-card">
+        <div class="category-icon"><i class="fas fa-laptop"></i></div>
+        <h3>إلكترونيات</h3>
+      </a>
+      <a href="products.html?cat=fashion" class="category-card">
+        <div class="category-icon"><i class="fas fa-tshirt"></i></div>
+        <h3>أزياء</h3>
+      </a>
+      <a href="products.html?cat=home" class="category-card">
+        <div class="category-icon"><i class="fas fa-couch"></i></div>
+        <h3>المنزل</h3>
+      </a>
+      <a href="products.html?cat=beauty" class="category-card">
+        <div class="category-icon"><i class="fas fa-pump-soap"></i></div>
+        <h3>تجميل</h3>
+      </a>
+      <a href="products.html" class="category-card">
+        <div class="category-icon"><i class="fas fa-ellipsis-h"></i></div>
+        <h3>المزيد</h3>
+      </a>
+    </div>
+  </div>
+
+  <!-- Featured Products -->
+  <section class="section">
+    <div class="container">
+      <div class="section-title">
+        <h2>وصل حديثاً</h2>
+        <a href="products.html" class="btn btn-outline">عرض الكل</a>
+      </div>
+      
+      <div class="grid grid-cols-4 gap-lg" id="featured-products">
+        <!-- Products injected via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Promo Banner -->
+  <section class="section pt-0">
+    <div class="container">
+      <div class="promo-banner">
+        <div class="promo-text">
+          <h2>عروض نهاية الأسبوع</h2>
+          <p>خصومات تصل إلى 50% على تشكيلة مختارة من الإلكترونيات والأزياء.</p>
+          <div class="mt-4" style="font-size: 1.5rem; font-weight: bold;">
+            <i class="far fa-clock"></i> ينتهي العرض في: <span class="en-text">12:45:30</span>
+          </div>
+        </div>
+        <div>
+          <a href="products.html" class="btn" style="background: #fff; color: var(--color-primary);">استكشف العروض</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a href="#" class="logo mb-md">ZAYED<span>EXPRESS</span></a>
+          <p class="text-muted">نحن نقدم أفضل تجربة تسوق عبر الإنترنت مع آلاف المنتجات وأسرع خدمة توصيل في المنطقة.</p>
+          <div class="social-links">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h3>روابط هامة</h3>
+          <ul>
+            <li><a href="#">من نحن</a></li>
+            <li><a href="#">تواصل معنا</a></li>
+            <li><a href="#">الأسئلة الشائعة</a></li>
+            <li><a href="#">سياسة الخصوصية</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>الفئات</h3>
+          <ul>
+            <li><a href="products.html?cat=electronics">إلكترونيات</a></li>
+            <li><a href="products.html?cat=fashion">أزياء الموضة</a></li>
+            <li><a href="products.html?cat=home">المنزل والمطبخ</a></li>
+            <li><a href="products.html?cat=beauty">العطور والتجميل</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>تواصل معنا</h3>
+          <ul class="text-muted">
+            <li class="en-text"><i class="fas fa-phone"></i> +971 50 123 4567</li>
+            <li class="en-text"><i class="fas fa-envelope"></i> support@zayedexpress.com</li>
+            <li><i class="fas fa-map-marker-alt"></i> دبي، الإمارات العربية المتحدة</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 ZAYED EXPRESS. جميع الحقوق محفوظة.
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

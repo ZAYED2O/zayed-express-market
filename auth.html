@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | تسجيل الدخول</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .auth-page { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 200px); }
+    .auth-card { background: var(--color-card); border-radius: var(--radius-lg); border: 1px solid var(--color-border); width: 100%; max-width: 450px; padding: 3rem 2rem; box-shadow: var(--shadow-lg); }
+    .auth-header { text-align: center; margin-bottom: 2rem; }
+    .auth-header .logo { justify-content: center; margin-bottom: 1rem; }
+    .switch-auth { margin-top: 1.5rem; text-align: center; font-size: 0.95rem; }
+    .switch-auth a { color: var(--color-primary); font-weight: 700; cursor: pointer; }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    .social-login { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--color-border); text-align: center; }
+    .btn-google { background: #fff; color: #333; border: 1px solid #ccc; }
+    .btn-google:hover { background: #f1f1f1; }
+  </style>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="main-nav">
+      <div class="container nav-container" style="justify-content: center;">
+        <a href="index.html" class="logo"><img src="assets/logo.png" alt="Zayed Express" style="height: 45px; display: inline-block;"></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2>مرحباً بك مجدداً</h2>
+        <p class="text-muted">قم بتسجيل الدخول أو إنشاء حساب جديد</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-login" class="auth-form active">
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input type="email" id="l-email" class="form-control en-text" dir="ltr" placeholder="email@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input type="password" id="l-password" class="form-control en-text" dir="ltr" placeholder="********" required>
+        </div>
+        <div class="flex justify-between items-center mb-md">
+          <label class="flex items-center gap-sm" style="cursor: pointer;">
+            <input type="checkbox"> تذكرني
+          </label>
+          <a href="#" class="text-primary" style="font-size: 0.9rem;" onclick="alert('تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.'); return false;">نسيت كلمة المرور؟</a>
+        </div>
+        <button type="submit" class="btn btn-modern-primary btn-block">دخول</button>
+        <div class="switch-auth">
+          ليس لديك حساب؟ <a onclick="switchTab('register')">إنشاء حساب جديد</a>
+        </div>
+      </form>
+
+      <!-- Register Form -->
+      <form id="form-register" class="auth-form">
+        <div class="form-group">
+          <label class="form-label">الاسم الكامل</label>
+          <input type="text" id="r-name" class="form-control" placeholder="أحمد محمد" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input type="email" id="r-email" class="form-control en-text" dir="ltr" placeholder="email@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input type="password" id="r-password" class="form-control en-text" dir="ltr" placeholder="********" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-modern-primary btn-block">إنشاء حساب</button>
+        <div class="switch-auth">
+          لديك حساب بالفعل؟ <a onclick="switchTab('login')">تسجيل الدخول</a>
+        </div>
+      </form>
+
+      <div class="social-login">
+        <p class="text-muted mb-md">أو سجل الدخول باستخدام</p>
+        <!-- Real Google Sign-In Button Container -->
+        <div id="google-btn-container" style="display: flex; justify-content: center; margin-top: 10px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      if (tab === 'login') {
+        document.getElementById('form-login').classList.add('active');
+        document.querySelector('.auth-header h2').innerText = 'مرحباً بك مجدداً';
+        document.querySelector('.auth-header p').innerText = 'قم بتسجيل الدخول للمتابعة';
+      } else {
+        document.getElementById('form-register').classList.add('active');
+        document.querySelector('.auth-header h2').innerText = 'إنشاء حساب جديد';
+        document.querySelector('.auth-header p').innerText = 'انضم إلينا واستمتع بتجربة تسوق فريدة';
+      }
+    }
+
+    // Login
+    document.getElementById('form-login').addEventListener('submit', (e) => {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+
+    // Register
+    document.getElementById('form-register').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('r-name').value;
+      const email = document.getElementById('r-email').value;
+      const pass = document.getElementById('r-password').value;
+
+      if(typeof auth !== 'undefined') {
+        const res = auth.register(name, email, pass);
+        if (res.success) {
+          if(typeof showToast === 'function') showToast('تم إنشاء الحساب بنجاح');
+          setTimeout(() => { window.location.href = 'profile.html'; }, 1000);
+        } else {
+          if(typeof showToast === 'function') showToast(res.message, 'error');
+        }
+      }
+    });
+
+    // --- Real Google Login Integration ---
+    window.onload = function () {
+      // الرجاء استبدال هذا الرمز بـ Client ID الخاص بك من منصة Google Developer
+      const GOOGLE_CLIENT_ID = "2038832331-05jnne79cs5v2dlf2cfvuebcfm4tcl0h.apps.googleusercontent.com";
+      
+      if(typeof google !== 'undefined' && GOOGLE_CLIENT_ID !== "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com") {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse
+        });
+        
+        google.accounts.id.renderButton(
+          document.getElementById("google-btn-container"),
+          { theme: "outline", size: "large", type: "standard", shape: "rectangular", width: 350 }
+        );
+      } else {
+        // Fallback if no Client ID is provided
+        document.getElementById("google-btn-container").innerHTML = `
+          <button class="btn btn-google btn-block" type="button" onclick="alert('لكي يعمل تسجيل الدخول بحقيقة، يجب عليك إدخال Google Client ID في ملف auth.html أولاً.')">
+            <i class="fab fa-google" style="color: #DB4437; margin-left: 10px; font-size: 1.2rem;"></i> إعداد Google Login
+          </button>
+        `;
+      }
+    };
+
+    function handleGoogleCredentialResponse(response) {
+      // Decode JWT Token (response.credential)
+      const responsePayload = decodeJwtResponse(response.credential);
+      
+      console.log("ID: " + responsePayload.sub);
+      console.log('Full Name: ' + responsePayload.name);
+      console.log('Given Name: ' + responsePayload.given_name);
+      console.log('Family Name: ' + responsePayload.family_name);
+      console.log("Image URL: " + responsePayload.picture);
+      console.log("Email: " + responsePayload.email);
+
+      // Register the user in our local database
+      if(typeof auth !== 'undefined') {
+        // We use the google ID as a dummy password for this demo
+        auth.register(responsePayload.name, responsePayload.email, responsePayload.sub);
+      }
+      
+      if(typeof showToast === 'function') showToast('أهلاً بك ' + responsePayload.name + '! تم تسجيل الدخول بنجاح.');
+      setTimeout(() => { window.location.href = '../admin/index.html'; }, 1500);
+    }
+
+    function decodeJwtResponse(token) {
+      var base64Url = token.split('.')[1];
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+  </script>
+</body>
+</html>

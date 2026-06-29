@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | حسابي</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+    }
+    
+    .profile-sidebar {
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 100px;
+    }
+    
+    .user-info-sidebar {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-round);
+      background: var(--color-primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 1rem;
+    }
+    
+    .profile-nav a {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      color: var(--color-text-muted);
+      border-right: 3px solid transparent;
+      transition: all var(--transition-fast);
+    }
+    
+    .profile-nav a:hover, .profile-nav a.active {
+      background: rgba(240, 140, 0, 0.1);
+      color: var(--color-primary);
+      border-right-color: var(--color-primary);
+    }
+    
+    .profile-nav a i {
+      width: 20px;
+      text-align: center;
+    }
+    
+    .profile-content {
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 2.5rem;
+    }
+    
+    .view-section {
+      display: none;
+    }
+    
+    .view-section.active {
+      display: block;
+    }
+    
+    .order-card {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .order-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    
+    .status-pending { background: rgba(59, 130, 246, 0.1); color: var(--color-primary); }
+    .status-completed { background: rgba(16, 185, 129, 0.1); color: var(--color-success); }
+    .status-returned { background: rgba(239, 68, 68, 0.1); color: var(--color-danger); }
+    
+    /* Timeline */
+    .tracking-timeline {
+      display: flex;
+      justify-content: space-between;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .tracking-timeline::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 30px;
+      right: 30px;
+      height: 2px;
+      background: var(--color-border);
+      z-index: 1;
+    }
+    
+    .timeline-step {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      flex: 1;
+    }
+    
+    .timeline-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-card);
+      border: 2px solid var(--color-border);
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .timeline-step.active .timeline-icon {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+    
+    .timeline-step.active ~ .timeline-step .timeline-icon {
+      background: var(--color-card);
+      border-color: var(--color-border);
+    }
+    
+    .timeline-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+    .timeline-step.active .timeline-label {
+      color: var(--color-primary);
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-content {
+      background: var(--color-card); width: 100%; max-width: 450px;
+      border-radius: var(--radius-lg); padding: 2rem;
+    }
+    
+    @media(max-width: 768px) {
+      .profile-layout {
+        grid-template-columns: 1fr;
+      }
+      .profile-sidebar {
+        position: static;
+      }
+      .timeline-label { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="main-nav">
+      <div class="container nav-container">
+        <a href="index.html" class="logo">ZAYED<span>EXPRESS</span></a>
+        
+        <div class="nav-actions">
+          <a href="cart.html" class="action-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>السلة</span>
+            <div class="badge" id="cart-count">0</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container mb-xxl">
+    <div class="profile-layout">
+      
+      <!-- Sidebar -->
+      <aside class="profile-sidebar">
+        <div class="user-info-sidebar">
+          <div class="user-avatar" id="avatar-initial">U</div>
+          <h3 id="sidebar-name">اسم المستخدم</h3>
+          <p class="text-muted en-text" id="sidebar-email">user@email.com</p>
+        </div>
+        
+        <nav class="profile-nav">
+          <a href="#" class="active" data-view="dashboard"><i class="fas fa-user"></i> البيانات الشخصية</a>
+          <a href="#" data-view="orders"><i class="fas fa-box-open"></i> طلباتي</a>
+          <a href="#" data-view="addresses"><i class="fas fa-map-marker-alt"></i> العناوين المحفوظة</a>
+          <a href="#" onclick="logout(); return false;" style="color: var(--color-danger);"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+        </nav>
+      </aside>
+      
+      <!-- Content -->
+      <main class="profile-content">
+        
+        <!-- Personal Info -->
+        <section id="view-dashboard" class="view-section active">
+          <h2 class="mb-lg">البيانات الشخصية</h2>
+          <form id="profile-form">
+            <div class="form-group">
+              <label class="form-label">الاسم الكامل</label>
+              <input type="text" id="p-name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">البريد الإلكتروني</label>
+              <input type="email" id="p-email" class="form-control en-text" dir="ltr" disabled>
+              <small class="text-muted">لا يمكن تغيير البريد الإلكتروني.</small>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">حفظ التغييرات</button>
+          </form>
+        </section>
+        
+        <!-- Orders -->
+        <section id="view-orders" class="view-section">
+          <h2 class="mb-lg">سجل الطلبات</h2>
+          <div id="orders-list">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+        
+        <!-- Addresses -->
+        <section id="view-addresses" class="view-section">
+          <h2 class="mb-lg">العناوين المحفوظة</h2>
+          <div class="text-center text-muted" style="padding: 3rem;">
+            لا توجد عناوين محفوظة بعد.
+          </div>
+        </section>
+        
+      </main>
+      
+    </div>
+  </div>
+
+  <!-- Return Request Modal -->
+  <div class="modal-overlay" id="return-modal">
+    <div class="modal-content">
+      <h3 class="mb-md">طلب إرجاع منتج</h3>
+      <p class="text-muted mb-md">يرجى تحديد سبب الإرجاع للمساعدة في تحسين خدمتنا.</p>
+      <input type="hidden" id="return-order-id">
+      <div class="form-group">
+        <label class="form-label">سبب الإرجاع</label>
+        <select id="return-reason" class="form-control" required>
+          <option value="">-- اختر السبب --</option>
+          <option value="منتج تالف أو به عيب">منتج تالف أو به عيب مصنعي</option>
+          <option value="منتج غير مطابق للمواصفات">المنتج لا يطابق الوصف أو الصورة</option>
+          <option value="تأخير في التوصيل">تأخير كبير في التوصيل</option>
+          <option value="لم أعد بحاجة إليه">تغيير رأيي / لم أعد بحاجة إليه</option>
+          <option value="أخرى">سبب آخر</option>
+        </select>
+      </div>
+      <div class="flex gap-sm justify-end mt-lg">
+        <button class="btn btn-ghost" onclick="closeReturnModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="submitReturn()">تأكيد الطلب</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = auth.getCurrentUser();
+      if (!user) return; // handled by auth.js redirect
+      
+      // Setup UI
+      document.getElementById('sidebar-name').innerText = user.name;
+      document.getElementById('sidebar-email').innerText = user.email;
+      document.getElementById('avatar-initial').innerText = user.name.charAt(0).toUpperCase();
+      
+      document.getElementById('p-name').value = user.name;
+      document.getElementById('p-email').value = user.email;
+      
+      // Nav Logic
+      const navLinks = document.querySelectorAll('.profile-nav a[data-view]');
+      const views = document.querySelectorAll('.view-section');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          navLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+          
+          const target = link.getAttribute('data-view');
+          views.forEach(v => v.classList.remove('active'));
+          document.getElementById(`view-${target}`).classList.add('active');
+          
+          if(target === 'orders') renderOrders();
+        });
+      });
+      
+      // Update form
+      document.getElementById('profile-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Just mock updating
+        const newName = document.getElementById('p-name').value;
+        user.name = newName;
+        localStorage.setItem('ze_current_user', JSON.stringify(user));
+        document.getElementById('sidebar-name').innerText = user.name;
+        document.getElementById('avatar-initial').innerText = user.name.charAt(0).toUpperCase();
+        showToast('تم تحديث البيانات بنجاح');
+      });
+    });
+    
+    function renderOrders() {
+      const container = document.getElementById('orders-list');
+      const allOrders = db.getOrders();
+      
+      // Normally we'd filter by user id, but since it's local we just show all or fake it
+      if (allOrders.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center" style="padding: 2rem;">لا توجد طلبات سابقة.</p>';
+        return;
+      }
+      
+      let html = '';
+      allOrders.reverse().forEach(order => {
+        const date = new Date(order.date).toLocaleDateString('ar-AE');
+        
+        // Status class mapping
+        let statusClass = 'status-pending';
+        if (order.status === 'تم التسليم' || order.status === 'مكتمل') statusClass = 'status-completed';
+        else if (order.status.includes('إرجاع') || order.status === 'مسترجع') statusClass = 'status-returned';
+        
+        // Timeline Active State Logic
+        let step1='', step2='', step3='', step4='';
+        if (order.status === 'قيد التجهيز' || order.status === 'تم التأكيد') { step1='active'; }
+        else if (order.status === 'جاري التوصيل') { step1='active'; step2='active'; step3='active'; }
+        else if (order.status === 'مكتمل' || order.status === 'تم التسليم') { step1='active'; step2='active'; step3='active'; step4='active'; }
+        
+        let timelineHtml = '';
+        let actionBtnHtml = '';
+        
+        if (!order.status.includes('إرجاع') && order.status !== 'مسترجع') {
+          timelineHtml = `
+            <div class="tracking-timeline">
+              <div class="timeline-step ${step1 || 'active'}"><div class="timeline-icon"><i class="fas fa-check"></i></div><div class="timeline-label">تم التأكيد</div></div>
+              <div class="timeline-step ${step2}"><div class="timeline-icon"><i class="fas fa-box"></i></div><div class="timeline-label">قيد التجهيز</div></div>
+              <div class="timeline-step ${step3}"><div class="timeline-icon"><i class="fas fa-truck"></i></div><div class="timeline-label">جاري التوصيل</div></div>
+              <div class="timeline-step ${step4}"><div class="timeline-icon"><i class="fas fa-home"></i></div><div class="timeline-label">تم التسليم</div></div>
+            </div>
+          `;
+        }
+        
+        if (order.status === 'مكتمل' || order.status === 'تم التسليم') {
+          actionBtnHtml = `<button class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;" onclick="openReturnModal('${order.id}')"><i class="fas fa-undo"></i> طلب إرجاع</button>`;
+        }
+        
+        html += `
+          <div class="order-card">
+            <div class="order-header">
+              <div>
+                <strong>الطلب <span class="en-text">${order.id}</span></strong>
+                <div class="text-muted en-text" style="font-size: 0.85rem;">${date}</div>
+              </div>
+              <div class="order-status ${statusClass}">${order.status}</div>
+            </div>
+            
+            ${timelineHtml}
+            
+            <div class="flex justify-between items-center" style="margin-top: 1rem;">
+              <div class="text-muted">${order.items.length} منتج(ات)</div>
+              <div class="flex items-center gap-md">
+                ${actionBtnHtml}
+                <div class="en-text text-primary" style="font-weight: bold;">${order.total} د.إ</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+    
+    // Return Logic
+    const returnModal = document.getElementById('return-modal');
+    
+    function openReturnModal(orderId) {
+      document.getElementById('return-order-id').value = orderId;
+      document.getElementById('return-reason').value = '';
+      returnModal.classList.add('active');
+    }
+    
+    function closeReturnModal() {
+      returnModal.classList.remove('active');
+    }
+    
+    function submitReturn() {
+      const orderId = document.getElementById('return-order-id').value;
+      const reason = document.getElementById('return-reason').value;
+      
+      if(!reason) {
+        alert('الرجاء اختيار سبب الإرجاع');
+        return;
+      }
+      
+      db.updateOrder(orderId, { status: 'طلب إرجاع (قيد المراجعة)', returnReason: reason });
+      
+      closeReturnModal();
+      showToast('تم تقديم طلب الإرجاع بنجاح');
+      renderOrders();
+    }
+    
+    function logout() {
+      auth.logout();
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

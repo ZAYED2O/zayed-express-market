@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | تفاصيل المنتج</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .product-detail-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+    }
+    
+    .product-gallery {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: sticky;
+      top: 100px;
+    }
+    
+    .product-gallery img {
+      max-height: 500px;
+      object-fit: contain;
+    }
+    
+    .product-info-wrap {
+      padding: 1rem 0;
+    }
+    
+    .p-category {
+      color: var(--color-primary);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .p-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #fff;
+      line-height: 1.3;
+    }
+    
+    .p-rating {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      color: #FFD700;
+    }
+    
+    .p-price-wrap {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 2rem;
+    }
+    
+    .p-price {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--color-primary);
+    }
+    
+    .p-old-price {
+      font-size: 1.2rem;
+      text-decoration: line-through;
+      color: var(--color-text-muted);
+      margin-right: 1rem;
+    }
+    
+    .p-desc {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: var(--color-text);
+      margin-bottom: 2rem;
+    }
+    
+    .qty-selector {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      width: fit-content;
+      margin-bottom: 2rem;
+      background: var(--color-card);
+    }
+    
+    .qty-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: var(--color-text);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    
+    .qty-input {
+      width: 50px;
+      height: 40px;
+      text-align: center;
+      border: none;
+      border-left: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      background: transparent;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .action-buttons .btn {
+      flex: 1;
+      padding: 1rem;
+      font-size: 1.1rem;
+    }
+    
+    /* Responsive */
+    @media(max-width: 768px) {
+      .product-detail-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      .product-gallery {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="main-nav">
+      <div class="container nav-container">
+        <a href="index.html" class="logo">ZAYED<span>EXPRESS</span></a>
+        
+        <div class="nav-actions">
+          <a href="cart.html" class="action-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>السلة</span>
+            <div class="badge" id="cart-count">0</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container mb-xxl">
+    <div id="product-container">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      const container = document.getElementById('product-container');
+      
+      const product = db.getProductById(productId);
+      
+      if(!product) {
+        container.innerHTML = `
+          <div class="text-center" style="padding: 5rem 0;">
+            <h2>المنتج غير موجود</h2>
+            <p class="text-muted mb-lg">عذراً، المنتج الذي تبحث عنه غير متوفر أو تم حذفه.</p>
+            <a href="products.html" class="btn btn-primary">العودة للمنتجات</a>
+          </div>
+        `;
+        return;
+      }
+      
+      // Render Product
+      const oldPrice = product.oldPrice ? `<span class="p-old-price en-text">${product.oldPrice} د.إ</span>` : '';
+      
+      let starsHTML = '';
+      const fullStars = Math.floor(product.rating || 5);
+      for(let i=0; i<5; i++) {
+        if(i < fullStars) starsHTML += '<i class="fas fa-star"></i>';
+        else starsHTML += '<i class="far fa-star"></i>';
+      }
+      
+      container.innerHTML = `
+        <div class="product-detail-layout">
+          <div class="product-gallery">
+            <img src="${product.image}" alt="${product.name}">
+          </div>
+          <div class="product-info-wrap">
+            <div class="p-category">${getCategoryName(product.category)}</div>
+            <h1 class="p-title">${product.name}</h1>
+            <div class="p-rating">
+              ${starsHTML}
+              <span class="text-muted en-text">(${product.reviews || 0} تقييم)</span>
+            </div>
+            
+            <div class="p-price-wrap">
+              <span class="p-price en-text">${product.price} د.إ</span>
+              ${oldPrice}
+            </div>
+            
+            <p class="p-desc">${product.description}</p>
+            
+            <div class="qty-selector">
+              <button class="qty-btn" onclick="updateQty(1)"><i class="fas fa-plus"></i></button>
+              <input type="text" id="p-qty" class="qty-input en-text" value="1" readonly>
+              <button class="qty-btn" onclick="updateQty(-1)"><i class="fas fa-minus"></i></button>
+            </div>
+            
+            <div class="action-buttons">
+              <button class="btn btn-primary" onclick="addCurrentToCart('${product.id}')">
+                <i class="fas fa-cart-plus"></i> أضف إلى السلة
+              </button>
+              <button class="btn btn-outline" onclick="showToast('تمت الإضافة للمفضلة')">
+                <i class="far fa-heart"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    function updateQty(change) {
+      const input = document.getElementById('p-qty');
+      let val = parseInt(input.value) + change;
+      if(val < 1) val = 1;
+      input.value = val;
+    }
+    
+    function addCurrentToCart(id) {
+      const qty = parseInt(document.getElementById('p-qty').value);
+      const product = db.getProductById(id);
+      db.addToCart(product, qty);
+      showToast(`تمت إضافة ${qty} من ${product.name} إلى السلة`);
+    }
+  </script>
+</body>
+</html>

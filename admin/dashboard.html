@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | E-TECH CMS</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="../../assets/images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="../../assets/images/logo.png" alt="E-TECH">
+            <h2>E-<span>TECH</span> CMS</h2>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-chevron-left"></i></button>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <button class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="label">Dashboard</span>
+                </button>
+                <button class="nav-item" data-page="pages">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="label">Pages</span>
+                    <span class="badge">10</span>
+                </button>
+                <button class="nav-item" data-page="services">
+                    <i class="fas fa-cogs"></i>
+                    <span class="label">Services</span>
+                    <span class="badge">6</span>
+                </button>
+                <button class="nav-item" data-page="portfolio">
+                    <i class="fas fa-images"></i>
+                    <span class="label">Portfolio</span>
+                    <span class="badge">9</span>
+                </button>
+                <button class="nav-item" data-page="blog">
+                    <i class="fas fa-blog"></i>
+                    <span class="label">Blog Posts</span>
+                    <span class="badge">12</span>
+                </button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Media & Content</div>
+                <button class="nav-item" data-page="media">
+                    <i class="fas fa-photo-video"></i>
+                    <span class="label">Media Library</span>
+                </button>
+                <button class="nav-item" data-page="testimonials">
+                    <i class="fas fa-quote-left"></i>
+                    <span class="label">Testimonials</span>
+                    <span class="badge">8</span>
+                </button>
+                <button class="nav-item" data-page="pricing">
+                    <i class="fas fa-tags"></i>
+                    <span class="label">Pricing Plans</span>
+                    <span class="badge">3</span>
+                </button>
+                <button class="nav-item" data-page="ads">
+                    <i class="fas fa-ad"></i>
+                    <span class="label">Advertisements</span>
+                </button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Communication</div>
+                <button class="nav-item" data-page="contacts">
+                    <i class="fas fa-envelope"></i>
+                    <span class="label">Contact Requests</span>
+                    <span class="badge">5</span>
+                </button>
+                <button class="nav-item" data-page="subscribers">
+                    <i class="fas fa-users"></i>
+                    <span class="label">Subscribers</span>
+                    <span class="badge">247</span>
+                </button>
+                <button class="nav-item" data-page="chat">
+                    <i class="fas fa-comments"></i>
+                    <span class="label">Live Chat</span>
+                </button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Settings</div>
+                <button class="nav-item" data-page="seo">
+                    <i class="fas fa-search"></i>
+                    <span class="label">SEO Settings</span>
+                </button>
+                <button class="nav-item" data-page="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="label">Analytics</span>
+                </button>
+                <button class="nav-item" data-page="admins">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="label">Admin Accounts</span>
+                </button>
+                <button class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span class="label">Website Settings</span>
+                </button>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80" alt="Admin">
+                <div class="user-info">
+                    <div class="name">Admin User</div>
+                    <div class="role">Super Administrator</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search anything...">
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </button>
+                <button class="header-btn" title="Messages">
+                    <i class="fas fa-envelope"></i>
+                </button>
+                <button class="header-btn" title="View Website" onclick="window.open('../../index.html', '_blank')">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button class="header-btn" title="Logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content" id="dashboardContent">
+            <h1 class="page-title">Dashboard Overview</h1>
+            <p class="page-subtitle">Welcome back! Here's what's happening with your website.</p>
+
+            <!-- Stats Cards -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <h3>Total Visitors</h3>
+                        <div class="value">24,592</div>
+                        <div class="change up"><i class="fas fa-arrow-up"></i> 12.5% vs last month</div>
+                    </div>
+                    <div class="stat-card-icon green"><i class="fas fa-users"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <h3>Total Projects</h3>
+                        <div class="value">156</div>
+                        <div class="change up"><i class="fas fa-arrow-up"></i> 8.2% vs last month</div>
+                    </div>
+                    <div class="stat-card-icon blue"><i class="fas fa-briefcase"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <h3>Contact Requests</h3>
+                        <div class="value">42</div>
+                        <div class="change down"><i class="fas fa-arrow-down"></i> 3.1% vs last month</div>
+                    </div>
+                    <div class="stat-card-icon orange"><i class="fas fa-envelope"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-info">
+                        <h3>Subscribers</h3>
+                        <div class="value">1,247</div>
+                        <div class="change up"><i class="fas fa-arrow-up"></i> 18.7% vs last month</div>
+                    </div>
+                    <div class="stat-card-icon purple"><i class="fas fa-user-plus"></i></div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>Website Traffic</h3>
+                        <div class="chart-filters">
+                            <button class="chart-filter active">Week</button>
+                            <button class="chart-filter">Month</button>
+                            <button class="chart-filter">Year</button>
+                        </div>
+                    </div>
+                    <div class="chart-placeholder">
+                        <div style="text-align: center; color: var(--medium-gray);">
+                            <i class="fas fa-chart-area" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <p>Traffic Analytics Chart</p>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem;">Connect Google Analytics for real-time data</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>Service Distribution</h3>
+                    </div>
+                    <div class="chart-placeholder">
+                        <div style="text-align: center; color: var(--medium-gray);">
+                            <i class="fas fa-chart-pie" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <p>Services Breakdown</p>
+                            <div style="margin-top: 1rem; text-align: left; display: inline-block;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><span style="width: 12px; height: 12px; background: var(--primary); border-radius: 3px;"></span> Web Dev (35%)</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><span style="width: 12px; height: 12px; background: #3b82f6; border-radius: 3px;"></span> E-Commerce (25%)</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><span style="width: 12px; height: 12px; background: #f59e0b; border-radius: 3px;"></span> Mobile Apps (20%)</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;"><span style="width: 12px; height: 12px; background: #a855f7; border-radius: 3px;"></span> Education (12%)</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="width: 12px; height: 12px; background: #22c55e; border-radius: 3px;"></span> Other (8%)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Contact Requests -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Recent Contact Requests</h3>
+                    <div class="table-actions">
+                        <button class="btn-sm-admin btn-outline-admin"><i class="fas fa-filter"></i> Filter</button>
+                        <button class="btn-sm-admin btn-primary-admin" onclick="openModal('contactModal')"><i class="fas fa-plus"></i> Add New</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Service</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Ahmed Hassan</strong></td>
+                                <td>ahmed@example.com</td>
+                                <td>Web Development</td>
+                                <td>May 30, 2026</td>
+                                <td><span class="status pending"><span class="status-dot-inline"></span> Pending</span></td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn"><i class="fas fa-edit"></i></button>
+                                        <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sarah Mitchell</strong></td>
+                                <td>sarah@example.com</td>
+                                <td>E-Commerce</td>
+                                <td>May 29, 2026</td>
+                                <td><span class="status active"><span class="status-dot-inline"></span> In Progress</span></td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn"><i class="fas fa-edit"></i></button>
+                                        <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mohamed Ali</strong></td>
+                                <td>mohamed@example.com</td>
+                                <td>Mobile App</td>
+                                <td>May 28, 2026</td>
+                                <td><span class="status completed"><span class="status-dot-inline"></span> Completed</span></td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn"><i class="fas fa-edit"></i></button>
+                                        <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Layla Ahmed</strong></td>
+                                <td>layla@example.com</td>
+                                <td>UI/UX Design</td>
+                                <td>May 27, 2026</td>
+                                <td><span class="status pending"><span class="status-dot-inline"></span> Pending</span></td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn"><i class="fas fa-edit"></i></button>
+                                        <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Omar Khaled</strong></td>
+                                <td>omar@example.com</td>
+                                <td>Educational Platform</td>
+                                <td>May 26, 2026</td>
+                                <td><span class="status active"><span class="status-dot-inline"></span> In Progress</span></td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn"><i class="fas fa-edit"></i></button>
+                                        <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Blog Posts -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Recent Blog Posts</h3>
+                    <div class="table-actions">
+                        <button class="btn-sm-admin btn-outline-admin"><i class="fas fa-filter"></i> Filter</button>
+                        <button class="btn-sm-admin btn-primary-admin" onclick="openModal('blogModal')"><i class="fas fa-plus"></i> New Post</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Author</th>
+                                <th>Date</th>
+                                <th>Views</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Top 10 Web Development Trends 2026</strong></td>
+                                <td>Development</td>
+                                <td>Ahmed Khaled</td>
+                                <td>May 15, 2026</td>
+                                <td>1,245</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn"><i class="fas fa-edit"></i></button>
+                                        <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>How to Build an E-Commerce Store That Converts</strong></td>
+                                <td>E-Commerce</td>
+                                <td>Sarah Mitchell</td>
+                                <td>May 10, 2026</td>
+                                <td>987</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn"><i class="fas fa-edit"></i></button>
+                                        <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mobile App UX: Best Practices for 2026</strong></td>
+                                <td>Mobile</td>
+                                <td>Omar Hassan</td>
+                                <td>May 5, 2026</td>
+                                <td>756</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn"><i class="fas fa-edit"></i></button>
+                                        <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Contact Modal -->
+    <div class="admin-modal-overlay" id="contactModal">
+        <div class="admin-modal">
+            <div class="admin-modal-header">
+                <h3>Add Contact Request</h3>
+                <button class="admin-modal-close" onclick="closeModal('contactModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="admin-modal-body">
+                <form class="admin-form">
+                    <div class="admin-form-row">
+                        <div class="admin-form-group">
+                            <label>First Name</label>
+                            <input type="text" placeholder="Enter first name">
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Last Name</label>
+                            <input type="text" placeholder="Enter last name">
+                        </div>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="Enter email">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Service</label>
+                        <select>
+                            <option>Select a service</option>
+                            <option>Web Development</option>
+                            <option>Educational Platforms</option>
+                            <option>E-Commerce</option>
+                            <option>Mobile Apps</option>
+                            <option>UI/UX Design</option>
+                            <option>Technical Support</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Message</label>
+                        <textarea placeholder="Enter message"></textarea>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Status</label>
+                        <select>
+                            <option>Pending</option>
+                            <option>In Progress</option>
+                            <option>Completed</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn-sm-admin btn-outline-admin" onclick="closeModal('contactModal')">Cancel</button>
+                <button class="btn-sm-admin btn-primary-admin">Save Contact</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Blog Post Modal -->
+    <div class="admin-modal-overlay" id="blogModal">
+        <div class="admin-modal">
+            <div class="admin-modal-header">
+                <h3>Add New Blog Post</h3>
+                <button class="admin-modal-close" onclick="closeModal('blogModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="admin-modal-body">
+                <form class="admin-form">
+                    <div class="admin-form-group">
+                        <label>Post Title</label>
+                        <input type="text" placeholder="Enter post title">
+                    </div>
+                    <div class="admin-form-row">
+                        <div class="admin-form-group">
+                            <label>Category</label>
+                            <select>
+                                <option>Development</option>
+                                <option>E-Commerce</option>
+                                <option>Mobile</option>
+                                <option>Education</option>
+                                <option>Design</option>
+                                <option>Security</option>
+                            </select>
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Author</label>
+                            <select>
+                                <option>Ahmed Khaled</option>
+                                <option>Sarah Mitchell</option>
+                                <option>Omar Hassan</option>
+                                <option>Layla Ahmed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Featured Image</label>
+                        <input type="file" accept="image/*">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Excerpt</label>
+                        <textarea placeholder="Short description of the post"></textarea>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Content</label>
+                        <textarea placeholder="Full post content..." style="min-height: 200px;"></textarea>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Tags (comma separated)</label>
+                        <input type="text" placeholder="web development, react, trends">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>SEO Title</label>
+                        <input type="text" placeholder="SEO optimized title">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>SEO Description</label>
+                        <textarea placeholder="Meta description for SEO"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn-sm-admin btn-outline-admin" onclick="closeModal('blogModal')">Cancel</button>
+                <button class="btn-sm-admin btn-primary-admin">Publish Post</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const icon = sidebarToggle.querySelector('i');
+            icon.classList.toggle('fa-chevron-left');
+            icon.classList.toggle('fa-chevron-right');
+        });
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                const page = this.getAttribute('data-page');
+                if (page && page !== 'dashboard') {
+                    showToast(`Navigating to ${page}...`, 'info');
+                }
+            });
+        });
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.admin-modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const container = document.querySelector('.toast-container') || (() => {
+                const div = document.createElement('div');
+                div.className = 'toast-container';
+                div.style.cssText = 'position:fixed;top:100px;right:30px;z-index:99999;display:flex;flex-direction:column;gap:0.75rem;';
+                document.body.appendChild(div);
+                return div;
+            })();
+
+            const toast = document.createElement('div');
+            const colors = {
+                success: '#22c55e',
+                error: '#ef4444',
+                info: '#3b82f6',
+                warning: '#f59e0b'
+            };
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                info: 'info-circle',
+                warning: 'exclamation-triangle'
+            };
+
+            toast.style.cssText = `padding:1rem 1.5rem;border-radius:12px;color:white;font-weight:500;display:flex;align-items:center;gap:0.75rem;box-shadow:0 10px 40px rgba(0,0,0,0.3);background:${colors[type]};animation:slideIn 0.3s ease;`;
+            toast.innerHTML = `<i class="fas fa-${icons[type]}"></i> ${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                showToast('Logging out...', 'info');
+                setTimeout(() => {
+                    window.location.href = '../../index.html';
+                }, 1000);
+            }
+        }
+
+        // Chart Filter Buttons
+        document.querySelectorAll('.chart-filter').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.querySelectorAll('.chart-filter').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Add keyframes for toast animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            @keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
+        `;
+        document.head.appendChild(style);
+
+        console.log('%c E-TECH Admin Dashboard Loaded ', 'background: #C8FF00; color: #0A0A0A; font-size: 16px; font-weight: bold; padding: 8px 16px;');
+    </script>
+</body>
+</html>

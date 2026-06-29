@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | إدارة الطلبات</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/admin-style.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="admin-header">
+    <div class="logo-area">
+      <a href="index.html" class="logo">
+        ZAYED<span>EXPRESS</span>
+      </a>
+      <span class="logo-badge">SELLER CENTRAL</span>
+    </div>
+    
+    <div class="search-bar">
+      <select>
+        <option>الطلبات</option>
+      </select>
+      <input type="text" id="order-search" placeholder="ابحث برقم الطلب...">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+    
+    <div class="header-actions">
+      <a href="../index.html" class="action-item" style="color: var(--admin-primary);">
+        <i class="fas fa-store"></i>
+        <span>المتجر</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sub Header (Menu) -->
+  <div class="admin-subheader">
+    <ul class="admin-menu">
+      <li><a href="index.html">لوحة القياس</a></li>
+      <li><a href="inventory.html">إدارة المخزون</a></li>
+      <li><a href="orders.html" class="active">إدارة الطلبات</a></li>
+      <li><a href="#">الإعلانات</a></li>
+      <li><a href="reports.html">التقارير</a></li>
+      <li><a href="#">الأداء</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <div class="page-title">
+      إدارة الطلبات المفتوحة والمرتجعات
+    </div>
+    
+    <div class="table-container">
+      <div style="padding: 1rem; border-bottom: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; background: var(--admin-bg);">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <select class="form-control" style="width: auto;" id="filter-status" onchange="renderAdminOrders()">
+            <option value="all">كل الحالات</option>
+            <option value="قيد التجهيز">قيد التجهيز</option>
+            <option value="جاري التوصيل">جاري التوصيل</option>
+            <option value="تم التسليم">مكتمل / تم التسليم</option>
+            <option value="إرجاع">طلبات الإرجاع</option>
+          </select>
+        </div>
+      </div>
+      
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>التاريخ</th>
+            <th>الإجمالي</th>
+            <th>المنتجات</th>
+            <th>الحالة / سبب الإرجاع</th>
+            <th>إجراء وتحديث الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="orders-list">
+          <!-- Injected via JS -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="../js/data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAdminOrders();
+      
+      document.getElementById('order-search').addEventListener('keyup', (e) => {
+        renderAdminOrders(e.target.value);
+      });
+    });
+    
+    function renderAdminOrders(searchQuery = '') {
+      const tbody = document.getElementById('orders-list');
+      let allOrders = db.getOrders();
+      
+      const filter = document.getElementById('filter-status').value;
+      
+      if (filter !== 'all') {
+        if (filter === 'إرجاع') {
+          allOrders = allOrders.filter(o => o.status.includes('إرجاع') || o.status === 'مسترجع');
+        } else {
+          allOrders = allOrders.filter(o => o.status === filter || (filter === 'تم التسليم' && o.status === 'مكتمل'));
+        }
+      }
+      
+      if (searchQuery) {
+        allOrders = allOrders.filter(o => o.id.includes(searchQuery));
+      }
+      
+      if(allOrders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 3rem;">لا توجد طلبات.</td></tr>`;
+        return;
+      }
+      
+      let html = '';
+      allOrders.reverse().forEach(o => {
+        const date = new Date(o.date).toLocaleDateString('en-GB');
+        
+        let statusBadge = 'status-inactive';
+        if (o.status === 'مكتمل' || o.status === 'تم التسليم') statusBadge = 'status-active';
+        else if (o.status.includes('إرجاع') || o.status === 'مسترجع') statusBadge = 'status-inactive';
+        else statusBadge = 'status-pending'; // using standard class
+        
+        // Custom styling for pending badge if needed, using inactive color for now as warning
+        let statusStyle = '';
+        if (o.status === 'قيد التجهيز' || o.status === 'تم التأكيد' || o.status === 'جاري التوصيل') {
+          statusStyle = 'background: rgba(245, 158, 11, 0.2); color: var(--admin-warning);';
+        }
+        
+        let actionHtml = '';
+        
+        // Normal Order Actions
+        if (!o.status.includes('إرجاع') && o.status !== 'مسترجع') {
+          actionHtml = `
+            <select class="form-control" style="width: 140px; display: inline-block; padding: 0.2rem;" onchange="updateOrderStatus('${o.id}', this.value)">
+              <option value="" disabled selected>تحديث الحالة</option>
+              <option value="قيد التجهيز">قيد التجهيز</option>
+              <option value="جاري التوصيل">جاري التوصيل</option>
+              <option value="تم التسليم">تم التسليم</option>
+            </select>
+          `;
+        } 
+        // Return Request Actions
+        else if (o.status === 'طلب إرجاع (قيد المراجعة)') {
+          actionHtml = `
+            <button class="btn btn-primary" style="padding: 0.2rem 0.5rem;" onclick="processReturn('${o.id}', 'مسترجع')">قبول الإرجاع</button>
+            <button class="btn" style="padding: 0.2rem 0.5rem; color: var(--admin-danger);" onclick="processReturn('${o.id}', 'تم التسليم')">رفض الطلب</button>
+          `;
+        }
+        
+        let returnReasonHtml = '';
+        if (o.returnReason) {
+          returnReasonHtml = `<div style="font-size: 0.8rem; color: var(--admin-danger); margin-top: 5px;">سبب الإرجاع: ${o.returnReason}</div>`;
+        }
+        
+        html += `
+          <tr>
+            <td class="en-text"><a href="#">${o.id}</a></td>
+            <td class="en-text">${date}</td>
+            <td class="en-text" style="font-weight: bold;">${o.total} د.إ</td>
+            <td>${o.items.length} منتج</td>
+            <td>
+              <span class="status-badge" style="${statusStyle}">${o.status}</span>
+              ${returnReasonHtml}
+            </td>
+            <td>${actionHtml}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+    
+    function updateOrderStatus(id, newStatus) {
+      if(!newStatus) return;
+      db.updateOrder(id, { status: newStatus });
+      renderAdminOrders(document.getElementById('order-search').value);
+    }
+    
+    function processReturn(id, finalStatus) {
+      let msg = finalStatus === 'مسترجع' ? 'هل أنت متأكد من قبول الإرجاع؟ سيتم استرداد الأموال للعميل.' : 'هل أنت متأكد من رفض الإرجاع؟ سيعود الطلب لحالة (تم التسليم).';
+      if(confirm(msg)) {
+        db.updateOrder(id, { status: finalStatus });
+        renderAdminOrders(document.getElementById('order-search').value);
+      }
+    }
+  </script>
+</body>
+</html>

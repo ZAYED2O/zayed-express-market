@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | سلة التسوق</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .cart-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+    }
+    
+    .cart-items {
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+    }
+    
+    .cart-item {
+      display: flex;
+      gap: 1.5rem;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .cart-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    
+    .cart-item-img {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-md);
+      background: #fff;
+      object-fit: contain;
+      padding: 0.5rem;
+    }
+    
+    .cart-item-details {
+      flex: 1;
+    }
+    
+    .cart-item-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .cart-item-price {
+      color: var(--color-primary);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .cart-item-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .qty-selector {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+    }
+    
+    .qty-btn {
+      width: 30px;
+      height: 30px;
+      background: transparent;
+      border: none;
+      color: var(--color-text);
+      cursor: pointer;
+    }
+    
+    .qty-input {
+      width: 40px;
+      height: 30px;
+      text-align: center;
+      border: none;
+      border-left: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      background: transparent;
+      color: #fff;
+    }
+    
+    .btn-remove {
+      color: var(--color-danger);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-remove:hover {
+      text-decoration: underline;
+    }
+    
+    .cart-summary {
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      position: sticky;
+      top: 100px;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      color: var(--color-text-muted);
+    }
+    
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .coupon-box {
+      display: flex;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .coupon-box input {
+      flex: 1;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      border-left: none;
+    }
+    
+    .coupon-box button {
+      border-radius: var(--radius-md) 0 0 var(--radius-md);
+    }
+    
+    @media(max-width: 992px) {
+      .cart-layout {
+        grid-template-columns: 1fr;
+      }
+      .cart-summary {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="main-nav">
+      <div class="container nav-container">
+        <a href="index.html" class="logo">ZAYED<span>EXPRESS</span></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container mb-xxl">
+    <div class="section-title mt-5" style="margin-top: 2rem;">
+      <h2>سلة التسوق</h2>
+    </div>
+    
+    <div class="cart-layout">
+      <div class="cart-items" id="cart-items-container">
+        <!-- Rendered by JS -->
+      </div>
+      
+      <div class="cart-summary">
+        <h3>ملخص الطلب</h3>
+        <div class="coupon-box">
+          <input type="text" id="coupon-code" class="form-control" placeholder="كود الخصم">
+          <button class="btn btn-outline" onclick="applyCoupon()">تطبيق</button>
+        </div>
+        
+        <div class="summary-row">
+          <span>المجموع الفرعي</span>
+          <span class="en-text" id="cart-subtotal">0 د.إ</span>
+        </div>
+        <div class="summary-row">
+          <span>الشحن</span>
+          <span id="cart-shipping">مجاني</span>
+        </div>
+        <div class="summary-row" id="discount-row" style="display: none; color: var(--color-success);">
+          <span>الخصم</span>
+          <span class="en-text" id="cart-discount">-0 د.إ</span>
+        </div>
+        
+        <div class="summary-total">
+          <span>الإجمالي</span>
+          <span class="en-text text-primary" id="cart-total">0 د.إ</span>
+        </div>
+        
+        <a href="checkout.html" class="btn btn-primary btn-block mt-4" id="checkout-btn">متابعة الشراء</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>
