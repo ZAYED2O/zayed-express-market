@@ -4,10 +4,11 @@
 
 class StoreDB {
   constructor() {
-    // Auto-detect API base URL: localhost in dev, production server in production
+    // In production (Vercel), API is on the same domain → use relative URL
+    // In local dev, use localhost:3000
     this.baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3000'
-      : 'https://zayed-express-api.onrender.com';
+      : '';
   }
 
   _request(method, url, body = null) {

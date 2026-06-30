@@ -1,6 +1,6 @@
-server/
+server/node_modules/
+server/database.db
+server/.env
 .git/
 .gitignore
-package.json
-package-lock.json
 node_modules/

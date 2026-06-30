@@ -5,11 +5,10 @@ const supabaseUrl = process.env.SUPABASE_URL || 'https://psfhiaipjxzakpnwgume.su
 const supabaseKey = process.env.SUPABASE_SECRET_KEY;
 
 if (!supabaseKey) {
-  console.error('❌ SUPABASE_SECRET_KEY is required in .env');
-  process.exit(1);
+  console.error('❌ SUPABASE_SECRET_KEY is required. Set it in Vercel environment variables.');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey, {
+const supabase = createClient(supabaseUrl, supabaseKey || 'missing_key', {
   auth: { autoRefreshToken: false, persistSession: false }
 });
 
