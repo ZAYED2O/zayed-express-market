@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check URL params for initial category filter
   const urlParams = new URLSearchParams(window.location.search);
   const catParam = urlParams.get('cat');
+  const dealsParam = urlParams.get('deals');
+
   if (catParam) {
     const radio = document.querySelector(`input[name="category"][value="${catParam}"]`);
     if(radio) radio.checked = true;
@@ -27,6 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchParam = urlParams.get('search');
   if (searchParam && searchInput) {
     searchInput.value = searchParam;
+  }
+
+  // Show deals mode banner
+  if (dealsParam === 'true') {
+    const titleEl = document.getElementById('page-title');
+    if (titleEl) titleEl.innerText = '🏷️ عروض اليوم';
   }
   
   // Listeners
@@ -47,12 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyFilters() {
     let filtered = db.getProducts();
     
+    // 0. Deals Filter (products with oldPrice = discounted)
+    if (dealsParam === 'true') {
+      filtered = filtered.filter(p => p.oldPrice && p.oldPrice > p.price);
+      document.getElementById('page-title').innerText = '🏷️ عروض اليوم';
+    }
+
     // 1. Category Filter
     const selectedCat = document.querySelector('input[name="category"]:checked').value;
-    if (selectedCat !== 'all') {
+    if (selectedCat !== 'all' && dealsParam !== 'true') {
       filtered = filtered.filter(p => p.category === selectedCat);
       document.getElementById('page-title').innerText = getCategoryName(selectedCat);
-    } else {
+    } else if (dealsParam !== 'true') {
       document.getElementById('page-title').innerText = 'جميع المنتجات';
     }
     
@@ -81,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (sortVal === 'price-high') {
       filtered.sort((a, b) => b.price - a.price);
     } else {
-      // newest (reverse order)
       filtered.reverse();
     }
     
