@@ -3,10 +3,17 @@
 // =========================================
 
 class Auth {
+  constructor() {
+    // Same logic as data.js: relative URL in production, localhost in dev
+    this.baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3000'
+      : '';
+  }
+
   _request(method, url, body = null) {
     try {
       const xhr = new XMLHttpRequest();
-      xhr.open(method, 'http://localhost:3000' + url, false);
+      xhr.open(method, this.baseUrl + url, false);
       xhr.setRequestHeader('Content-Type', 'application/json');
       
       // Attach JWT token for authorization if it exists
@@ -35,6 +42,7 @@ class Auth {
       return { success: false, message: 'خطأ في الاتصال بالخادم' };
     }
   }
+
 
   getUsers() {
     const res = this._request('GET', '/api/users');
