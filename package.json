@@ -2,10 +2,6 @@
   "name": "zayed-express-market",
   "version": "1.0.0",
   "description": "Zayed Express Market - Full Stack E-Commerce",
-  "scripts": {
-    "start": "cd server && node server.js",
-    "build": "cd server && npm install"
-  },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
     "bcryptjs": "^2.4.3",
