@@ -24,6 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('search-input');
   const searchBtn = document.getElementById('search-btn');
   
+  const searchParam = urlParams.get('search');
+  if (searchParam && searchInput) {
+    searchInput.value = searchParam;
+  }
+  
   // Listeners
   catRadios.forEach(r => r.addEventListener('change', applyFilters));
   priceRadios.forEach(r => r.addEventListener('change', applyFilters));

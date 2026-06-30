@@ -86,6 +86,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.includes('auth.html')) {
       window.location.href = user.role === 'admin' ? 'admin/index.html' : 'profile.html';
     }
+    // Protect admin pages from non-admin users
+    const isAdminFolder = window.location.pathname.includes('/admin/');
+    if (isAdminFolder && user.role !== 'admin') {
+      window.location.href = '../index.html';
+    }
   } else {
     // If we are on protected pages
     const protectedPages = ['profile.html', 'checkout.html'];

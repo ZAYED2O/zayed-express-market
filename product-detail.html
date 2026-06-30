@@ -44,7 +44,7 @@
     .p-title {
       font-size: 2.5rem;
       margin-bottom: 1rem;
-      color: #fff;
+      color: var(--color-text);
       line-height: 1.3;
     }
     
@@ -139,6 +139,183 @@
         position: static;
       }
     }
+
+    /* ---- Reviews Section ---- */
+    .reviews-section {
+      margin-top: 4rem;
+      padding-top: 3rem;
+      border-top: 2px solid var(--color-border);
+    }
+
+    .reviews-section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .reviews-section h2 i {
+      color: #FFD700;
+    }
+
+    .review-summary {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--color-border);
+    }
+
+    .review-big-score {
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1;
+      font-family: var(--font-latin);
+    }
+
+    .review-stars-avg {
+      color: #FFD700;
+      font-size: 1.4rem;
+    }
+
+    .review-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .review-card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: box-shadow var(--transition-fast);
+    }
+
+    .review-card:hover {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .review-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .reviewer-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .reviewer-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-primary), #EA580C);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .reviewer-name {
+      font-weight: 600;
+    }
+
+    .reviewer-date {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .review-stars {
+      color: #FFD700;
+    }
+
+    .review-comment {
+      color: var(--color-text);
+      line-height: 1.7;
+    }
+
+    /* Write Review Form */
+    .write-review-box {
+      background: var(--color-card);
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+    }
+
+    .write-review-box h3 {
+      margin-bottom: 1.5rem;
+      color: var(--color-text);
+    }
+
+    .star-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+    }
+
+    .star-selector input { display: none; }
+
+    .star-selector label {
+      font-size: 2rem;
+      color: #D1D5DB;
+      cursor: pointer;
+      transition: color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .star-selector label:hover,
+    .star-selector label:hover ~ label,
+    .star-selector input:checked ~ label {
+      color: #FFD700;
+      transform: scale(1.1);
+    }
+
+    .review-textarea {
+      width: 100%;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      font-family: var(--font-arabic);
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 110px;
+      color: var(--color-text);
+      background: var(--color-bg);
+      margin-bottom: 1.25rem;
+      transition: border-color var(--transition-fast);
+    }
+
+    .review-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .login-prompt {
+      text-align: center;
+      padding: 2rem;
+      background: var(--color-card);
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--color-border);
+    }
+
+    .no-reviews-msg {
+      text-align: center;
+      padding: 3rem;
+      color: var(--color-text-muted);
+    }
   </style>
 </head>
 <body>
@@ -163,6 +340,13 @@
   <div class="container mb-xxl">
     <div id="product-container">
       <!-- Injected via JS -->
+    </div>
+    <!-- Reviews Section -->
+    <div class="reviews-section" id="reviews-section" style="display:none;">
+      <h2><i class="fas fa-star"></i> آراء العملاء</h2>
+      <div class="review-summary" id="review-summary"></div>
+      <div class="review-list" id="review-list"></div>
+      <div id="review-form-wrap"></div>
     </div>
   </div>
 
@@ -234,6 +418,8 @@
           </div>
         </div>
       `;
+      // Load Reviews after rendering the product
+      loadReviews(productId);
     });
     
     function updateQty(change) {
@@ -248,6 +434,116 @@
       const product = db.getProductById(id);
       db.addToCart(product, qty);
       showToast(`تمت إضافة ${qty} من ${product.name} إلى السلة`);
+    }
+
+    // ---- Reviews ----
+    function loadReviews(productId) {
+      const section = document.getElementById('reviews-section');
+      const summaryEl = document.getElementById('review-summary');
+      const listEl = document.getElementById('review-list');
+      const formWrap = document.getElementById('review-form-wrap');
+
+      section.style.display = 'block';
+
+      const reviews = db.getProductReviews(productId);
+
+      // Summary
+      if (reviews.length > 0) {
+        const avg = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) starsHtml += `<i class="${i <= Math.round(avg) ? 'fas' : 'far'} fa-star"></i>`;
+        summaryEl.innerHTML = `
+          <div class="review-big-score">${avg}</div>
+          <div>
+            <div class="review-stars-avg">${starsHtml}</div>
+            <div class="text-muted">${reviews.length} تقييم</div>
+          </div>
+        `;
+      } else {
+        summaryEl.style.display = 'none';
+      }
+
+      // Review Cards
+      if (reviews.length === 0) {
+        listEl.innerHTML = `<div class="no-reviews-msg"><i class="far fa-comment-dots" style="font-size:3rem;margin-bottom:1rem;"></i><br>لا توجد مراجعات بعد. كن أول من يقيّم!</div>`;
+      } else {
+        listEl.innerHTML = reviews.map(r => {
+          const date = new Date(r.created_at || Date.now()).toLocaleDateString('ar-AE');
+          let stars = '';
+          for (let i = 1; i <= 5; i++) stars += `<i class="${i <= r.rating ? 'fas' : 'far'} fa-star"></i>`;
+          const initial = (r.username || 'م')[0].toUpperCase();
+          return `
+            <div class="review-card">
+              <div class="review-card-header">
+                <div class="reviewer-info">
+                  <div class="reviewer-avatar">${initial}</div>
+                  <div>
+                    <div class="reviewer-name">${r.username || 'مستخدم مجهول'}</div>
+                    <div class="reviewer-date">${date}</div>
+                  </div>
+                </div>
+                <div class="review-stars">${stars}</div>
+              </div>
+              <p class="review-comment">${r.comment}</p>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Write Review Form
+      const user = JSON.parse(localStorage.getItem('ze_current_user') || 'null');
+      if (user) {
+        formWrap.innerHTML = `
+          <div class="write-review-box">
+            <h3><i class="fas fa-pen-nib" style="color:var(--color-primary);margin-left:0.5rem;"></i>أضف مراجعتك</h3>
+            <div class="star-selector" id="star-selector">
+              <input type="radio" id="s5" name="rating" value="5"><label for="s5">&#9733;</label>
+              <input type="radio" id="s4" name="rating" value="4"><label for="s4">&#9733;</label>
+              <input type="radio" id="s3" name="rating" value="3" checked><label for="s3">&#9733;</label>
+              <input type="radio" id="s2" name="rating" value="2"><label for="s2">&#9733;</label>
+              <input type="radio" id="s1" name="rating" value="1"><label for="s1">&#9733;</label>
+            </div>
+            <textarea id="review-text" class="review-textarea" placeholder="شارك تجربتك مع هذا المنتج..."></textarea>
+            <button class="btn btn-primary" id="submit-review-btn" onclick="submitReview('${productId}')">
+              <i class="fas fa-paper-plane"></i> إرسال المراجعة
+            </button>
+          </div>
+        `;
+      } else {
+        formWrap.innerHTML = `
+          <div class="login-prompt">
+            <i class="fas fa-lock" style="font-size:2.5rem;color:var(--color-primary);margin-bottom:1rem;"></i>
+            <p style="margin-bottom:1rem;font-size:1.1rem;">سجّل دخولك لكتابة مراجعة</p>
+            <a href="login.html" class="btn btn-primary">تسجيل الدخول</a>
+          </div>
+        `;
+      }
+    }
+
+    function submitReview(productId) {
+      const ratingInput = document.querySelector('input[name="rating"]:checked');
+      const commentInput = document.getElementById('review-text');
+      if (!ratingInput || !commentInput.value.trim()) {
+        showToast('الرجاء اختيار تقييم وكتابة تعليق', 'error');
+        return;
+      }
+      const btn = document.getElementById('submit-review-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
+      const result = db.addProductReview(productId, {
+        rating: parseInt(ratingInput.value),
+        comment: commentInput.value.trim()
+      });
+
+      if (result) {
+        showToast('تم إضافة مراجعتك بنجاح!');
+        loadReviews(productId);
+      } else {
+        showToast('حدث خطأ، الرجاء المحاولة مرة أخرى', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال المراجعة';
+      }
     }
   </script>
 </body>

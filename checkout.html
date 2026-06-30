@@ -295,7 +295,7 @@
       const newOrder = {
         id: orderId,
         date: new Date().toISOString(),
-        total: parseFloat(localStorage.getItem('ze_checkout_total')),
+        total: parseFloat(localStorage.getItem('ze_checkout_total') || db.getCartTotal()),
         items: db.getCart(),
         status: 'قيد المعالجة'
       };

@@ -50,6 +50,84 @@
   --transition-slow: 0.5s ease;
 }
 
+/* =========================================
+   DARK MODE THEME
+   ========================================= */
+body.dark-theme {
+  --color-bg: #0F1117;
+  --color-card: #1A1D2E;
+  --color-card-hover: #252840;
+  --color-text: #E5E7EB;
+  --color-text-muted: #9CA3AF;
+  --color-border: #2D3155;
+  --color-secondary: #1E2A4A;
+  --color-glass: rgba(26, 29, 46, 0.85);
+}
+
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme h5,
+body.dark-theme h6 {
+  color: #F3F4F6;
+}
+
+body.dark-theme .header,
+body.dark-theme .main-nav {
+  background: rgba(15, 17, 23, 0.95);
+  border-bottom-color: var(--color-border);
+}
+
+body.dark-theme .card,
+body.dark-theme .product-gallery,
+body.dark-theme .qty-selector {
+  background: var(--color-card);
+  border-color: var(--color-border);
+}
+
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea {
+  background: var(--color-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+body.dark-theme .footer {
+  background: #080A10;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.5);
+  z-index: 9999;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), background var(--transition-normal);
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.12) rotate(15deg);
+  box-shadow: 0 6px 28px rgba(249, 115, 22, 0.7);
+}
+
+.theme-toggle-btn i {
+  transition: transform var(--transition-normal);
+}
+
 * {
   margin: 0;
   padding: 0;

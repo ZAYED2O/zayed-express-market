@@ -3,10 +3,17 @@
 // =========================================
 
 class StoreDB {
+  constructor() {
+    // Auto-detect API base URL: localhost in dev, production server in production
+    this.baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3000'
+      : 'https://zayed-express-api.onrender.com';
+  }
+
   _request(method, url, body = null) {
     try {
       const xhr = new XMLHttpRequest();
-      xhr.open(method, 'http://localhost:3000' + url, false);
+      xhr.open(method, this.baseUrl + url, false);
       xhr.setRequestHeader('Content-Type', 'application/json');
       
       // Attach JWT token for authentication
@@ -114,6 +121,16 @@ class StoreDB {
   updateOrder(id, updatedData) {
     const res = this._request('PUT', `/api/orders/${id}`, updatedData);
     return res ? res.success : false;
+  }
+
+  // --- Reviews ---
+  getProductReviews(productId) {
+    return this._request('GET', `/api/products/${productId}/reviews`) || [];
+  }
+
+  addProductReview(productId, reviewData) {
+    // reviewData: { rating: Number, comment: String }
+    return this._request('POST', `/api/products/${productId}/reviews`, reviewData);
   }
 }
 

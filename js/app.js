@@ -5,6 +5,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   
+  // ---- Dark / Light Mode ----
+  initTheme();
+
   // Render featured products if container exists
   const featuredContainer = document.getElementById('featured-products');
   if (featuredContainer) {
@@ -38,6 +41,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// =========================================
+// Dark / Light Mode Logic
+// =========================================
+function initTheme() {
+  const savedTheme = localStorage.getItem('ze_theme') || 'light';
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-theme');
+  }
+
+  // Inject floating toggle button
+  const btn = document.createElement('button');
+  btn.id = 'theme-toggle-btn';
+  btn.className = 'theme-toggle-btn';
+  btn.title = 'تبديل الوضع المظلم';
+  btn.setAttribute('aria-label', 'تبديل الوضع المظلم');
+  btn.innerHTML = document.body.classList.contains('dark-theme')
+    ? '<i class="fas fa-sun"></i>'
+    : '<i class="fas fa-moon"></i>';
+  
+  btn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-theme');
+    const isDark = document.body.classList.contains('dark-theme');
+    localStorage.setItem('ze_theme', isDark ? 'dark' : 'light');
+    btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    btn.style.transform = 'scale(1.3) rotate(360deg)';
+    setTimeout(() => btn.style.transform = '', 400);
+  });
+
+  document.body.appendChild(btn);
+}
+
 
 function updateCartBadge() {
   const cartCount = document.getElementById('cart-count');

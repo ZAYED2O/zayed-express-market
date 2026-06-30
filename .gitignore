@@ -1,5 +1,7 @@
 server/node_modules/
 server/database.db
+server/.env
+.env
 .vercel/
 node_modules/
 .DS_Store
