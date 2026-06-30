@@ -2,5 +2,4 @@ server/node_modules/
 server/database.db
 server/.env
 .git/
-.gitignore
 node_modules/
