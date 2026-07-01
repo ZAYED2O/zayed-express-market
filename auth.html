@@ -112,7 +112,21 @@
     // Login
     document.getElementById('form-login').addEventListener('submit', (e) => {
       e.preventDefault();
-      window.location.href = 'index.html';
+      const email = document.getElementById('l-email').value;
+      const pass = document.getElementById('l-password').value;
+
+      if (typeof auth !== 'undefined') {
+        const res = auth.login(email, pass);
+        if (res.success) {
+          if (typeof showToast === 'function') showToast('تم تسجيل الدخول بنجاح 👋');
+          const user = auth.getCurrentUser();
+          setTimeout(() => {
+            window.location.href = user && user.role === 'admin' ? 'admin/index.html' : 'profile.html';
+          }, 800);
+        } else {
+          if (typeof showToast === 'function') showToast(res.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error');
+        }
+      }
     });
 
     // Register
