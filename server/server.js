@@ -36,7 +36,7 @@ function isAdmin(req, res, next) {
 // --- USERS ---
 
 app.get('/api/users', verifyToken, isAdmin, async (req, res) => {
-  const { data, error } = await supabase.from('users').select('id, name, email, role');
+  const { data, error } = await supabase.from('ec_users').select('id, name, email, role');
   if (error) return res.status(500).json({ error: error.message });
   res.json({ users: data });
 });
@@ -48,13 +48,13 @@ app.post('/api/auth/register', async (req, res) => {
   if (!name || !email || !password)
     return res.json({ success: false, message: 'يرجى ملء جميع الحقول المطلوبة' });
 
-  const { data: existing } = await supabase.from('users').select('id').eq('email', email).maybeSingle();
+  const { data: existing } = await supabase.from('ec_users').select('id').eq('email', email).maybeSingle();
   if (existing) return res.json({ success: false, message: 'البريد الإلكتروني مسجل مسبقاً' });
 
   const userId = 'u' + Date.now();
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const { error } = await supabase.from('users').insert([{ id: userId, name, email, password: hashedPassword, role: 'user' }]);
+  const { error } = await supabase.from('ec_users').insert([{ id: userId, name, email, password: hashedPassword, role: 'user' }]);
   if (error) return res.status(500).json({ success: false, message: error.message });
 
   const token = jwt.sign({ id: userId, email, role: 'user' }, JWT_SECRET, { expiresIn: '24h' });
@@ -66,7 +66,7 @@ app.post('/api/auth/login', async (req, res) => {
   if (!email || !password)
     return res.json({ success: false, message: 'يرجى إدخال البريد الإلكتروني وكلمة المرور' });
 
-  const { data: row } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
+  const { data: row } = await supabase.from('ec_users').select('*').eq('email', email).maybeSingle();
   if (row && (await bcrypt.compare(password, row.password))) {
     const token = jwt.sign({ id: row.id, email: row.email, role: row.role }, JWT_SECRET, { expiresIn: '24h' });
     res.json({ success: true, token, user: { id: row.id, name: row.name, email: row.email, role: row.role } });
@@ -78,7 +78,7 @@ app.post('/api/auth/login', async (req, res) => {
 // --- VENDORS ---
 
 app.get('/api/vendors', async (req, res) => {
-  const { data, error } = await supabase.from('vendors').select('*');
+  const { data, error } = await supabase.from('ec_vendors').select('*');
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
@@ -87,7 +87,7 @@ app.post('/api/vendors', verifyToken, isAdmin, async (req, res) => {
   const { name, contact } = req.body;
   if (!name) return res.status(400).json({ error: 'Vendor name is required' });
   const vendorId = 'v' + Date.now();
-  const { data, error } = await supabase.from('vendors').insert([{ id: vendorId, name, contact, active: true }]).select().single();
+  const { data, error } = await supabase.from('ec_vendors').insert([{ id: vendorId, name, contact, active: true }]).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
@@ -95,13 +95,13 @@ app.post('/api/vendors', verifyToken, isAdmin, async (req, res) => {
 // --- PRODUCTS ---
 
 app.get('/api/products', async (req, res) => {
-  const { data, error } = await supabase.from('products').select('*');
+  const { data, error } = await supabase.from('ec_products').select('*');
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
 app.get('/api/products/:id', async (req, res) => {
-  const { data, error } = await supabase.from('products').select('*').eq('id', req.params.id).maybeSingle();
+  const { data, error } = await supabase.from('ec_products').select('*').eq('id', req.params.id).maybeSingle();
   if (error) return res.status(500).json({ error: error.message });
   if (!data) return res.status(404).json({ error: 'Product not found' });
   res.json(data);
@@ -110,7 +110,7 @@ app.get('/api/products/:id', async (req, res) => {
 app.post('/api/products', verifyToken, isAdmin, async (req, res) => {
   const { name, description, price, oldPrice, category, image, badge } = req.body;
   const productId = 'p' + Date.now();
-  const { data, error } = await supabase.from('products')
+  const { data, error } = await supabase.from('ec_products')
     .insert([{ id: productId, name, description, price, oldPrice, category, image, rating: 5.0, reviews: 0, badge }])
     .select().single();
   if (error) return res.status(500).json({ error: error.message });
@@ -128,13 +128,13 @@ app.put('/api/products/:id', verifyToken, isAdmin, async (req, res) => {
   if (image !== undefined) updates.image = image;
   if (badge !== undefined) updates.badge = badge;
 
-  const { error } = await supabase.from('products').update(updates).eq('id', req.params.id);
+  const { error } = await supabase.from('ec_products').update(updates).eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
 
 app.delete('/api/products/:id', verifyToken, isAdmin, async (req, res) => {
-  const { error } = await supabase.from('products').delete().eq('id', req.params.id);
+  const { error } = await supabase.from('ec_products').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
@@ -142,7 +142,7 @@ app.delete('/api/products/:id', verifyToken, isAdmin, async (req, res) => {
 // --- CART ---
 
 app.get('/api/cart', verifyToken, async (req, res) => {
-  const { data, error } = await supabase.from('cart').select('*').eq('userId', req.user.id);
+  const { data, error } = await supabase.from('ec_cart').select('*').eq('userId', req.user.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
@@ -151,13 +151,13 @@ app.post('/api/cart', verifyToken, async (req, res) => {
   const { product, quantity } = req.body;
   if (!product || !product.id) return res.status(400).json({ error: 'Product is required' });
 
-  const { data: existing } = await supabase.from('cart').select('*').eq('userId', req.user.id).eq('id', product.id).maybeSingle();
+  const { data: existing } = await supabase.from('ec_cart').select('*').eq('userId', req.user.id).eq('id', product.id).maybeSingle();
 
   if (existing) {
-    await supabase.from('cart').update({ quantity: existing.quantity + (quantity || 1) })
+    await supabase.from('ec_cart').update({ quantity: existing.quantity + (quantity || 1) })
       .eq('userId', req.user.id).eq('id', product.id);
   } else {
-    await supabase.from('cart').insert([{
+    await supabase.from('ec_cart').insert([{
       userId: req.user.id, id: product.id, name: product.name,
       description: product.description, price: product.price,
       oldPrice: product.oldPrice, category: product.category,
@@ -166,33 +166,34 @@ app.post('/api/cart', verifyToken, async (req, res) => {
     }]);
   }
 
-  const { data } = await supabase.from('cart').select('*').eq('userId', req.user.id);
+  const { data } = await supabase.from('ec_cart').select('*').eq('userId', req.user.id);
   res.json(data);
 });
 
 app.put('/api/cart/:id', verifyToken, async (req, res) => {
   const { quantity } = req.body;
-  await supabase.from('cart').update({ quantity }).eq('userId', req.user.id).eq('id', req.params.id);
-  const { data } = await supabase.from('cart').select('*').eq('userId', req.user.id);
+  await supabase.from('ec_cart').update({ quantity }).eq('userId', req.user.id).eq('id', req.params.id);
+  const { data } = await supabase.from('ec_cart').select('*').eq('userId', req.user.id);
   res.json(data);
 });
 
 app.delete('/api/cart/:id', verifyToken, async (req, res) => {
-  await supabase.from('cart').delete().eq('userId', req.user.id).eq('id', req.params.id);
-  const { data } = await supabase.from('cart').select('*').eq('userId', req.user.id);
+  await supabase.from('ec_cart').delete().eq('userId', req.user.id).eq('id', req.params.id);
+  const { data } = await supabase.from('ec_cart').select('*').eq('userId', req.user.id);
   res.json(data);
 });
 
 app.delete('/api/cart', verifyToken, async (req, res) => {
-  await supabase.from('cart').delete().eq('userId', req.user.id);
+  await supabase.from('ec_cart').delete().eq('userId', req.user.id);
   res.json([]);
 });
 
 // --- ORDERS ---
 
 app.get('/api/orders', verifyToken, async (req, res) => {
-  let query = supabase.from('orders').select('*').order('date', { ascending: false });
-  if (req.user.role !== 'admin') query = query.eq('userId', req.user.id);
+  // admin or support can view all orders
+  let query = supabase.from('ec_orders').select('*').order('date', { ascending: false });
+  if (req.user.role !== 'admin' && req.user.role !== 'support') query = query.eq('userId', req.user.id);
   const { data, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
   const orders = data.map(row => ({ ...row, items: typeof row.items === 'string' ? JSON.parse(row.items) : row.items }));
@@ -201,7 +202,7 @@ app.get('/api/orders', verifyToken, async (req, res) => {
 
 app.post('/api/orders', verifyToken, async (req, res) => {
   const { id, date, total, items, status } = req.body;
-  const { data, error } = await supabase.from('orders')
+  const { data, error } = await supabase.from('ec_orders')
     .insert([{ id, userId: req.user.id, date, total, status, items: JSON.stringify(items) }])
     .select().single();
   if (error) return res.status(500).json({ error: error.message });
@@ -210,8 +211,11 @@ app.post('/api/orders', verifyToken, async (req, res) => {
 
 app.put('/api/orders/:id', verifyToken, async (req, res) => {
   const { status } = req.body;
-  let query = supabase.from('orders').update({ status }).eq('id', req.params.id);
-  if (req.user.role !== 'admin') query = query.eq('userId', req.user.id);
+  let query = supabase.from('ec_orders').update({ status }).eq('id', req.params.id);
+  // normal users can cancel their orders if status is pending
+  if (req.user.role !== 'admin' && req.user.role !== 'support') {
+    query = query.eq('userId', req.user.id).eq('status', 'قيد الانتظار'); // or equivalent pending status
+  }
   const { error } = await query;
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
@@ -221,7 +225,7 @@ app.put('/api/orders/:id', verifyToken, async (req, res) => {
 
 app.get('/api/products/:id/reviews', async (req, res) => {
   const { data, error } = await supabase
-    .from('reviews')
+    .from('ec_reviews')
     .select('*')
     .eq('productId', req.params.id)
     .order('date', { ascending: false });
@@ -238,7 +242,7 @@ app.post('/api/products/:id/reviews', verifyToken, async (req, res) => {
   }
 
   const { data: user, error: userError } = await supabase
-    .from('users')
+    .from('ec_users')
     .select('name')
     .eq('id', req.user.id)
     .single();
@@ -258,12 +262,193 @@ app.post('/api/products/:id/reviews', verifyToken, async (req, res) => {
   };
 
   const { data, error } = await supabase
-    .from('reviews')
+    .from('ec_reviews')
     .insert([newReview])
     .select()
     .single();
 
   if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// --- ADDRESSES ---
+
+app.get('/api/addresses', verifyToken, async (req, res) => {
+  const { data, error } = await supabase
+    .from('ec_addresses')
+    .select('*')
+    .eq('user_id', req.user.id)
+    .order('created_at', { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post('/api/addresses', verifyToken, async (req, res) => {
+  const { title, address_line, city, phone, is_default } = req.body;
+  if (!title || !address_line || !city || !phone) {
+    return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
+  }
+
+  if (is_default) {
+    await supabase
+      .from('ec_addresses')
+      .update({ is_default: false })
+      .eq('user_id', req.user.id);
+  }
+
+  const { data, error } = await supabase
+    .from('ec_addresses')
+    .insert([{
+      user_id: req.user.id,
+      title,
+      address_line,
+      city,
+      phone,
+      is_default: !!is_default
+    }])
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.put('/api/addresses/:id', verifyToken, async (req, res) => {
+  const { title, address_line, city, phone, is_default } = req.body;
+  const updates = {};
+  if (title !== undefined) updates.title = title;
+  if (address_line !== undefined) updates.address_line = address_line;
+  if (city !== undefined) updates.city = city;
+  if (phone !== undefined) updates.phone = phone;
+  if (is_default !== undefined) updates.is_default = !!is_default;
+
+  if (is_default) {
+    await supabase
+      .from('ec_addresses')
+      .update({ is_default: false })
+      .eq('user_id', req.user.id);
+  }
+
+  const { data, error } = await supabase
+    .from('ec_addresses')
+    .update(updates)
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.delete('/api/addresses/:id', verifyToken, async (req, res) => {
+  const { error } = await supabase
+    .from('ec_addresses')
+    .delete()
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// --- CHAT & SUPPORT ---
+
+app.get('/api/tickets', verifyToken, async (req, res) => {
+  let query = supabase.from('ec_chat_channels').select('*').order('updated_at', { ascending: false });
+  
+  if (req.user.role !== 'admin' && req.user.role !== 'support') {
+    query = query.eq('creator_id', req.user.id);
+  }
+  
+  const { data, error } = await query;
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post('/api/tickets', verifyToken, async (req, res) => {
+  const { type, subject, participant_id } = req.body;
+  if (!type || !subject) {
+    return res.status(400).json({ error: 'الموضوع والنوع مطلوبان' });
+  }
+
+  const { data, error } = await supabase
+    .from('ec_chat_channels')
+    .insert([{
+      type,
+      subject,
+      creator_id: req.user.id,
+      participant_id: participant_id || null,
+      status: 'open'
+    }])
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.put('/api/tickets/:id', verifyToken, async (req, res) => {
+  const { status, participant_id } = req.body;
+  const updates = {};
+  if (status !== undefined) updates.status = status;
+  if (participant_id !== undefined) updates.participant_id = participant_id;
+  updates.updated_at = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('ec_chat_channels')
+    .update(updates)
+    .eq('id', req.params.id)
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.get('/api/tickets/:id/messages', verifyToken, async (req, res) => {
+  const { data, error } = await supabase
+    .from('ec_chat_messages')
+    .select('*')
+    .eq('channel_id', req.params.id)
+    .order('created_at', { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post('/api/tickets/:id/messages', verifyToken, async (req, res) => {
+  const { message, audio_data } = req.body;
+  if (!message && !audio_data) {
+    return res.status(400).json({ error: 'محتوى الرسالة فارغ' });
+  }
+
+  const { data: user } = await supabase
+    .from('ec_users')
+    .select('name')
+    .eq('id', req.user.id)
+    .single();
+  const senderName = user ? user.name : req.user.email;
+
+  const { data, error } = await supabase
+    .from('ec_chat_messages')
+    .insert([{
+      channel_id: req.params.id,
+      sender_id: req.user.id,
+      sender_name: senderName,
+      sender_role: req.user.role,
+      message: message || null,
+      audio_data: audio_data || null
+    }])
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  await supabase
+    .from('ec_chat_channels')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', req.params.id);
+
   res.json(data);
 });
 

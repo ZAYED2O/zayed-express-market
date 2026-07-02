@@ -518,7 +518,15 @@
         </div>
     </div>
 
+    <script src="../js/auth.js"></script>
+    <script src="../js/data.js"></script>
     <script>
+        // Enforce Super Admin Role Check
+        const currentUser = auth.getCurrentUser();
+        if (!currentUser || currentUser.role !== 'admin') {
+            window.location.href = '../auth.html';
+        }
+
         // Sidebar Toggle
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -530,18 +538,258 @@
             icon.classList.toggle('fa-chevron-right');
         });
 
-        // Navigation
+        // Store original dashboard view
+        const originalDashboardHTML = document.getElementById('dashboardContent').innerHTML;
+
+        // Navigation switcher
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
 
                 const page = this.getAttribute('data-page');
-                if (page && page !== 'dashboard') {
-                    showToast(`Navigating to ${page}...`, 'info');
+                const contentContainer = document.getElementById('dashboardContent');
+                
+                // Clear any running polling intervals
+                stopAdminChatPolling();
+
+                if (page === 'dashboard') {
+                    contentContainer.innerHTML = originalDashboardHTML;
+                    // re-register any chart filters if necessary
+                    document.querySelectorAll('.chart-filter').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            this.parentElement.querySelectorAll('.chart-filter').forEach(b => b.classList.remove('active'));
+                            this.classList.add('active');
+                        });
+                    });
+                } else if (page === 'chat') {
+                    renderAdminChatLayout();
+                } else {
+                    contentContainer.innerHTML = `
+                        <h1 class="page-title">${page.toUpperCase()}</h1>
+                        <p class="page-subtitle">هذه الصفحة قيد التطوير والربط البرمجي.</p>
+                        <div style="padding: 4rem; text-align: center; color: var(--medium-gray);">
+                            <i class="fas fa-tools" style="font-size: 4rem; margin-bottom: 1.5rem; color: var(--primary);"></i>
+                            <h3>الصفحة قيد الصيانة</h3>
+                        </div>
+                    `;
                 }
             });
         });
+
+        // --- Super Admin Chat System Logic ---
+        let adminActiveChannelId = null;
+        let adminChatPollInterval = null;
+        let adminMediaRecorder = null;
+        let adminAudioChunks = [];
+        let adminIsRecording = false;
+
+        function renderAdminChatLayout() {
+            const container = document.getElementById('dashboardContent');
+            container.innerHTML = `
+                <h1 class="page-title">Live Chat Center</h1>
+                <p class="page-subtitle">Respond to tickets, vendors, and support requests directly.</p>
+                
+                <div class="chat-panel" style="display: flex; height: calc(100vh - 220px); overflow: hidden; background: #111827; border-radius: 12px; border: 1px solid #374151;">
+                    <!-- Sidebar channels -->
+                    <div style="width: 320px; border-right: 1px solid #374151; display: flex; flex-direction: column; background: #1f2937;">
+                        <div style="padding: 1rem; border-bottom: 1px solid #374151;">
+                            <input type="text" id="admin-chat-search" placeholder="البحث في المحادثات..." oninput="filterAdminChats()" style="width:100%; padding:0.6rem; border-radius:6px; border:1px solid #4b5563; background:#111827; color:white; outline:none;">
+                        </div>
+                        <div id="admin-channels-list" style="flex: 1; overflow-y: auto; padding: 0.5rem;">
+                            <!-- Injected -->
+                        </div>
+                    </div>
+                    <!-- Conversation area -->
+                    <div style="flex: 1; display: flex; flex-direction: column; background: #0f172a;">
+                        <div id="admin-chat-empty" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#9ca3af;">
+                            <i class="fas fa-comments" style="font-size: 4rem; margin-bottom: 1rem; color: #f97316;"></i>
+                            <h3>الرجاء تحديد محادثة للرد عليها</h3>
+                        </div>
+                        <div id="admin-chat-active" style="flex: 1; display: none; flex-direction: column; height: 100%;">
+                            <div style="padding: 1rem 1.5rem; background: #1e293b; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 id="admin-chat-subject" style="margin: 0; color: white; font-size:1.1rem;">Chat Subject</h4>
+                                    <small id="admin-chat-user" style="color: #9ca3af;">العميل: ...</small>
+                                </div>
+                                <button class="btn-sm-admin" onclick="closeAdminTicket()" style="background:#ef4444; border:none; color:white; padding: 6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;"><i class="fas fa-lock"></i> إغلاق المحادثة</button>
+                            </div>
+                            <div id="admin-chat-messages" style="flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
+                                <!-- Messages -->
+                            </div>
+                            <div style="padding: 1rem; background: #1e293b; border-top: 1px solid #374151; display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="admin-chat-input" placeholder="اكتب ردك هنا..." style="flex: 1; padding: 0.75rem; border-radius: 6px; border: 1px solid #4b5563; background: #111827; color: white; outline:none;">
+                                <button id="admin-mic-btn" onclick="toggleAdminAudioRecording()" style="width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#4b5563; color:white; border:none; cursor:pointer; font-size:1.2rem; transition: background 0.2s;"><i class="fas fa-microphone"></i></button>
+                                <button onclick="sendAdminReply()" style="background: #f97316; color: white; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; cursor: pointer; font-weight: 600;"><i class="fas fa-paper-plane"></i> إرسال</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            loadAdminChats();
+        }
+
+        function loadAdminChats() {
+            const list = db.getTickets();
+            const container = document.getElementById('admin-channels-list');
+            const search = document.getElementById('admin-chat-search').value.toLowerCase();
+            
+            const filtered = list.filter(t => 
+                t.subject.toLowerCase().includes(search) || 
+                (t.creator_name && t.creator_name.toLowerCase().includes(search))
+            );
+            
+            if(filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#9ca3af; padding:2rem;">لا توجد محادثات نشطة</div>';
+                return;
+            }
+            
+            let html = '';
+            filtered.forEach(t => {
+                const isSelected = t.id === adminActiveChannelId;
+                const statusBadge = t.status === 'closed' ? '<span style="background:#ef4444; padding:2px 6px; border-radius:4px; font-size:0.75rem; color:white;">مغلقة</span>' : '<span style="background:#22c55e; padding:2px 6px; border-radius:4px; font-size:0.75rem; color:white;">مفتوحة</span>';
+                
+                html += `
+                    <div onclick="selectAdminChat('${t.id}')" style="padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; background: ${isSelected ? 'rgba(249, 115, 22, 0.15)' : 'transparent'}; border: 1px solid ${isSelected ? '#f97316' : 'transparent'}; transition: 0.2s;">
+                        <h4 style="margin: 0 0 4px; color: white; font-size:0.95rem;">${t.subject}</h4>
+                        <div style="color:#9ca3af; font-size:0.8rem; margin-bottom:6px;">المرسل: ${t.creator_name || 'بائع/مستخدم'}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            ${statusBadge}
+                            <span style="color:#9ca3af; font-size:0.75rem;">${new Date(t.created_at).toLocaleDateString('ar-AE')}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function filterAdminChats() {
+            loadAdminChats();
+        }
+
+        function selectAdminChat(channelId) {
+            adminActiveChannelId = channelId;
+            document.getElementById('admin-chat-empty').style.display = 'none';
+            document.getElementById('admin-chat-active').style.display = 'flex';
+            
+            // Highlight selected channel
+            loadAdminChats();
+            
+            // Fetch subject details
+            const tickets = db.getTickets();
+            const t = tickets.find(ticket => ticket.id === channelId);
+            if (t) {
+                document.getElementById('admin-chat-subject').innerText = t.subject;
+                document.getElementById('admin-chat-user').innerText = `المرسل: ${t.creator_name || 'مستخدم'}`;
+            }
+
+            loadAdminChatMessages();
+            
+            if (adminChatPollInterval) clearInterval(adminChatPollInterval);
+            adminChatPollInterval = setInterval(loadAdminChatMessages, 3000);
+        }
+
+        function loadAdminChatMessages() {
+            if(!adminActiveChannelId) return;
+            const container = document.getElementById('admin-chat-messages');
+            const messages = db.getTicketMessages(adminActiveChannelId);
+            
+            let html = '';
+            messages.forEach(msg => {
+                const isMe = msg.sender_id === currentUser.id;
+                
+                let audioHtml = '';
+                if (msg.audio_data) {
+                    audioHtml = `<div style="margin-top:6px;"><audio src="${msg.audio_data}" controls style="width:200px; height:32px;"></audio></div>`;
+                }
+
+                html += `
+                    <div style="max-width: 70%; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.4; align-self: ${isMe ? 'flex-end' : 'flex-start'}; background: ${isMe ? '#f97316' : '#1f2937'}; color: white;">
+                        <div style="font-weight:bold; font-size:0.75rem; margin-bottom: 2px;">${msg.sender_name}</div>
+                        <div>${msg.message || ''}</div>
+                        ${audioHtml}
+                    </div>
+                `;
+            });
+            
+            const shouldScroll = container.scrollTop + container.clientHeight >= container.scrollHeight - 50;
+            container.innerHTML = html;
+            if (shouldScroll || container.innerHTML === html) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        function sendAdminReply() {
+            const input = document.getElementById('admin-chat-input');
+            const text = input.value.trim();
+            if (!text || !adminActiveChannelId) return;
+
+            db.sendTicketMessage(adminActiveChannelId, { message: text });
+            input.value = '';
+            loadAdminChatMessages();
+        }
+
+        function closeAdminTicket() {
+            if(confirm('هل أنت متأكد من إغلاق هذا التذكرة نهائياً؟')) {
+                db.updateTicket(adminActiveChannelId, { status: 'closed' });
+                showToast('تم إغلاق المحادثة بنجاح');
+                renderAdminChatLayout();
+            }
+        }
+
+        function toggleAdminAudioRecording() {
+            const micBtn = document.getElementById('admin-mic-btn');
+            
+            if (!adminIsRecording) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        adminMediaRecorder = new MediaRecorder(stream);
+                        adminAudioChunks = [];
+                        
+                        adminMediaRecorder.addEventListener("dataavailable", event => {
+                            adminAudioChunks.push(event.data);
+                        });
+                        
+                        adminMediaRecorder.addEventListener("stop", () => {
+                            const audioBlob = new Blob(adminAudioChunks, { type: 'audio/mp3' });
+                            const reader = new FileReader();
+                            reader.readAsDataURL(audioBlob);
+                            reader.onloadend = () => {
+                                const base64Audio = reader.result;
+                                if (adminActiveChannelId) {
+                                    db.sendTicketMessage(adminActiveChannelId, { audio_data: base64Audio });
+                                    loadAdminChatMessages();
+                                }
+                            };
+                        });
+                        
+                        adminMediaRecorder.start();
+                        adminIsRecording = true;
+                        micBtn.style.background = '#ef4444';
+                        micBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                        showToast('جاري تسجيل الصوت...', 'info');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showToast('تعذر الوصول للميكروفون', 'error');
+                    });
+            } else {
+                if (adminMediaRecorder) {
+                    adminMediaRecorder.stop();
+                    adminMediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                adminIsRecording = false;
+                micBtn.style.background = '#4b5563';
+                micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            }
+        }
+
+        function stopAdminChatPolling() {
+            if (adminChatPollInterval) {
+                clearInterval(adminChatPollInterval);
+                adminChatPollInterval = null;
+            }
+        }
 
         // Modal Functions
         function openModal(modalId) {
@@ -598,6 +846,7 @@
         // Logout
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
+                auth.logout();
                 showToast('Logging out...', 'info');
                 setTimeout(() => {
                     window.location.href = '../../index.html';

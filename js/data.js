@@ -130,10 +130,49 @@ class StoreDB {
   }
 
   addProductReview(productId, reviewData) {
-    // reviewData: { rating: Number, comment: String }
     return this._request('POST', `/api/products/${productId}/reviews`, reviewData);
+  }
+
+  // --- Addresses ---
+  getAddresses() {
+    return this._request('GET', '/api/addresses') || [];
+  }
+
+  addAddress(address) {
+    return this._request('POST', '/api/addresses', address);
+  }
+
+  updateAddress(id, address) {
+    return this._request('PUT', `/api/addresses/${id}`, address);
+  }
+
+  deleteAddress(id) {
+    return this._request('DELETE', `/api/addresses/${id}`);
+  }
+
+  // --- Tickets & Chats ---
+  getTickets() {
+    return this._request('GET', '/api/tickets') || [];
+  }
+
+  createTicket(ticket) {
+    return this._request('POST', '/api/tickets', ticket);
+  }
+
+  updateTicket(id, updates) {
+    return this._request('PUT', `/api/tickets/${id}`, updates);
+  }
+
+  getTicketMessages(id) {
+    return this._request('GET', `/api/tickets/${id}/messages`) || [];
+  }
+
+  sendTicketMessage(id, messageData) {
+    // messageData: { message: string, audio_data: string }
+    return this._request('POST', `/api/tickets/${id}/messages`, messageData);
   }
 }
 
 // Global instance
 const db = new StoreDB();
+

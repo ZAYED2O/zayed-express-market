@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAYED EXPRESS | لوحة تحكم الدعم الفني</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    :root {
+      --sidebar-width: 320px;
+    }
+    
+    body {
+      background: var(--color-bg);
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .agent-header {
+      background: var(--color-card);
+      border-bottom: 1px solid var(--color-border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+      flex-shrink: 0;
+    }
+    
+    .agent-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-text);
+      text-decoration: none;
+    }
+    .agent-logo span {
+      color: var(--color-primary);
+    }
+    
+    .agent-layout {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* Tickets Sidebar */
+    .tickets-sidebar {
+      width: var(--sidebar-width);
+      background: var(--color-card);
+      border-left: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .sidebar-search {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .tickets-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+    
+    .agent-ticket-card {
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .agent-ticket-card:hover {
+      background: rgba(249, 115, 22, 0.05);
+      border-color: rgba(249, 115, 22, 0.2);
+    }
+    
+    .agent-ticket-card.active {
+      background: rgba(249, 115, 22, 0.1);
+      border-color: var(--color-primary);
+    }
+    
+    .ticket-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    /* Chat Content Area */
+    .chat-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg);
+      position: relative;
+    }
+    
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+      gap: 1rem;
+    }
+    
+    .chat-view-header {
+      background: var(--color-card);
+      border-bottom: 1px solid var(--color-border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+    
+    .chat-view-messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .chat-view-message {
+      max-width: 70%;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-lg);
+      font-size: 0.95rem;
+      line-height: 1.4;
+      position: relative;
+    }
+    
+    .chat-view-message.sent {
+      align-self: flex-end;
+      background: var(--color-primary);
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
+    
+    .chat-view-message.received {
+      align-self: flex-start;
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+      border-bottom-left-radius: 2px;
+    }
+    
+    .chat-view-input-area {
+      padding: 1rem;
+      background: var(--color-card);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    
+    .agent-voice-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-secondary);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+    
+    .agent-voice-btn.recording {
+      background: var(--color-danger);
+      animation: pulse-mic 1.2s infinite;
+    }
+    
+    @keyframes pulse-mic {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+      100% { transform: scale(1); }
+    }
+    
+    .audio-player {
+      margin-top: 0.5rem;
+      display: block;
+    }
+    .audio-player audio {
+      width: 220px;
+      height: 35px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="agent-header">
+    <a href="#" class="agent-logo">ZAYED<span>EXPRESS</span> <small style="font-size: 0.9rem; font-weight: normal; color: var(--color-text-muted);">| الدعم الفني</small></a>
+    <div class="flex items-center gap-md">
+      <span id="agent-name" class="font-bold">موظف الدعم</span>
+      <button class="btn btn-ghost text-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="agent-layout">
+    
+    <!-- Sidebar -->
+    <aside class="tickets-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-tickets" class="form-control" placeholder="البحث في التذاكر..." oninput="filterTickets()">
+      </div>
+      <div class="tickets-list" id="tickets-list-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </aside>
+    
+    <!-- Chat View -->
+    <main class="chat-view" id="chat-view-container">
+      <div class="empty-state" id="empty-chat-state">
+        <i class="fas fa-comments" style="font-size: 4rem; color: var(--color-primary); opacity: 0.5;"></i>
+        <h3>الرجاء تحديد تذكرة دعم فني لبدء المحادثة</h3>
+      </div>
+      
+      <div id="active-chat-container" class="flex flex-col h-full" style="display: none;">
+        <div class="chat-view-header">
+          <div>
+            <h3 id="active-subject" style="margin: 0;">موضوع التذكرة</h3>
+            <span id="active-user-name" class="text-muted" style="font-size: 0.9rem;">العميل: ...</span>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-outline" id="close-ticket-btn" onclick="closeActiveTicket()"><i class="fas fa-lock"></i> إغلاق التذكرة</button>
+          </div>
+        </div>
+        
+        <div class="chat-view-messages" id="chat-messages-container">
+          <!-- Messages -->
+        </div>
+        
+        <div class="chat-view-input-area">
+          <input type="text" id="chat-input-text" class="form-control" placeholder="اكتب ردك هنا...">
+          
+          <button class="agent-voice-btn" id="mic-btn" title="سجل رسالة صوتية">
+            <i class="fas fa-microphone"></i>
+          </button>
+          
+          <button class="btn btn-primary" onclick="sendReply()" style="padding: 0.6rem 1.5rem;"><i class="fas fa-paper-plane"></i> إرسال</button>
+        </div>
+      </div>
+    </main>
+    
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    let activeChannelId = null;
+    let chatInterval = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let allTickets = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = auth.getCurrentUser();
+      if (!user || (user.role !== 'support' && user.role !== 'admin')) {
+        window.location.href = 'support-login.html';
+        return;
+      }
+      
+      document.getElementById('agent-name').innerText = user.name;
+      loadTickets();
+      
+      // Auto reload tickets list every 5 seconds
+      setInterval(loadTickets, 5000);
+      
+      const micBtn = document.getElementById('mic-btn');
+      if (micBtn) {
+        micBtn.addEventListener('click', toggleAudioRecording);
+      }
+    });
+
+    function loadTickets() {
+      allTickets = db.getTickets();
+      renderTicketsList();
+    }
+
+    function renderTicketsList() {
+      const container = document.getElementById('tickets-list-container');
+      const searchQuery = document.getElementById('search-tickets').value.toLowerCase();
+      
+      const filtered = allTickets.filter(t => 
+        t.subject.toLowerCase().includes(searchQuery) ||
+        (t.creator_name && t.creator_name.toLowerCase().includes(searchQuery))
+      );
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted" style="padding: 2rem;">لا توجد تذاكر متطابقة</div>';
+        return;
+      }
+      
+      let html = '';
+      filtered.forEach(t => {
+        const isSelected = t.id === activeChannelId;
+        const date = new Date(t.created_at).toLocaleDateString('ar-AE');
+        let statusBadge = `<span class="order-status status-pending">مفتوحة</span>`;
+        if (t.status === 'closed') {
+          statusBadge = `<span class="order-status status-returned">مغلقة</span>`;
+        }
+        
+        html += `
+          <div class="agent-ticket-card ${isSelected ? 'active' : ''}" onclick="selectTicket('${t.id}')">
+            <h4 style="margin: 0 0 0.25rem 0; font-size:1rem;">${t.subject}</h4>
+            <div class="text-muted" style="font-size:0.85rem;">المستخدم: ${t.creator_name || 'عميل'}</div>
+            <div class="ticket-meta">
+              <span>${statusBadge}</span>
+              <span class="en-text text-muted">${date}</span>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function filterTickets() {
+      renderTicketsList();
+    }
+
+    function selectTicket(channelId) {
+      activeChannelId = channelId;
+      
+      // Toggle views
+      document.getElementById('empty-chat-state').style.display = 'none';
+      document.getElementById('active-chat-container').style.display = 'flex';
+      
+      // Update sidebar active highlights
+      renderTicketsList();
+      
+      // Get ticket detail
+      const ticket = allTickets.find(t => t.id === channelId);
+      if (ticket) {
+        document.getElementById('active-subject').innerText = ticket.subject;
+        document.getElementById('active-user-name').innerText = `العميل: ${ticket.creator_name || 'مجهول'}`;
+        
+        // Hide/show close ticket button
+        const closeBtn = document.getElementById('close-ticket-btn');
+        if (ticket.status === 'closed') {
+          closeBtn.style.display = 'none';
+        } else {
+          closeBtn.style.display = 'block';
+        }
+      }
+      
+      // Load chats
+      loadChatMessages();
+      
+      // Setup interval polling
+      if (chatInterval) clearInterval(chatInterval);
+      chatInterval = setInterval(loadChatMessages, 3000);
+    }
+
+    function loadChatMessages() {
+      if (!activeChannelId) return;
+      const container = document.getElementById('chat-messages-container');
+      const messages = db.getTicketMessages(activeChannelId);
+      
+      let html = '';
+      const user = auth.getCurrentUser();
+      
+      messages.forEach(msg => {
+        const isMe = msg.sender_id === user.id;
+        const date = new Date(msg.created_at).toLocaleTimeString('ar-AE', { hour: '2-digit', minute: '2-digit' });
+        
+        let audioHtml = '';
+        if (msg.audio_data) {
+          audioHtml = `
+            <div class="audio-player">
+              <audio src="${msg.audio_data}" controls></audio>
+            </div>
+          `;
+        }
+        
+        html += `
+          <div class="chat-view-message ${isMe ? 'sent' : 'received'}">
+            <div style="font-weight:bold; font-size:0.8rem; margin-bottom:0.25rem;">${msg.sender_name}</div>
+            <div>${msg.message || ''}</div>
+            ${audioHtml}
+            <div class="message-info">
+              <span></span>
+              <span class="en-text">${date}</span>
+            </div>
+          </div>
+        `;
+      });
+      
+      const shouldScroll = container.scrollTop + container.clientHeight >= container.scrollHeight - 50;
+      container.innerHTML = html;
+      if (shouldScroll || container.innerHTML === html) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function sendReply() {
+      const input = document.getElementById('chat-input-text');
+      const text = input.value.trim();
+      if (!text || !activeChannelId) return;
+      
+      db.sendTicketMessage(activeChannelId, { message: text });
+      input.value = '';
+      loadChatMessages();
+    }
+
+    function closeActiveTicket() {
+      if (confirm('هل أنت متأكد من إغلاق هذه التذكرة بشكل نهائي؟')) {
+        db.updateTicket(activeChannelId, { status: 'closed' });
+        alert('تم إغلاق التذكرة بنجاح');
+        loadTickets();
+        selectTicket(activeChannelId);
+      }
+    }
+
+    // --- Media Recorder Audio ---
+    function toggleAudioRecording() {
+      const micBtn = document.getElementById('mic-btn');
+      
+      if (!isRecording) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            mediaRecorder.addEventListener("dataavailable", event => {
+              audioChunks.push(event.data);
+            });
+            
+            mediaRecorder.addEventListener("stop", () => {
+              const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+              const reader = new FileReader();
+              reader.readAsDataURL(audioBlob);
+              reader.onloadend = () => {
+                const base64Audio = reader.result;
+                if (activeChannelId) {
+                  db.sendTicketMessage(activeChannelId, { audio_data: base64Audio });
+                  loadChatMessages();
+                }
+              };
+            });
+            
+            mediaRecorder.start();
+            isRecording = true;
+            micBtn.classList.add('recording');
+            micBtn.innerHTML = '<i class="fas fa-stop"></i>';
+          })
+          .catch(err => {
+            console.error('Microphone access denied:', err);
+            alert('لا يمكن الوصول للميكروفون');
+          });
+      } else {
+        if (mediaRecorder) {
+          mediaRecorder.stop();
+          mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+        isRecording = false;
+        micBtn.classList.remove('recording');
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      }
+    }
+
+    function logout() {
+      auth.logout();
+      window.location.href = 'support-login.html';
+    }
+  </script>
+</body>
+</html>

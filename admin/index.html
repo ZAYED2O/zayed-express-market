@@ -143,12 +143,26 @@
     
   </main>
 
+  <script src="../js/auth.js"></script>
   <script src="../js/data.js"></script>
   <script src="js/admin-app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Protect Seller Dashboard
+      const user = auth.getCurrentUser();
+      if (!user || (user.role !== 'vendor' && user.role !== 'admin')) {
+        window.location.href = '../auth.html';
+        return;
+      }
+      
       document.getElementById('current-time').innerText = new Date().toLocaleString('en-US');
       loadDashboardData();
+
+      // Configure seller microphone button
+      const sellerMicBtn = document.getElementById('sellerMicBtn');
+      if (sellerMicBtn) {
+        sellerMicBtn.addEventListener('click', toggleSellerAudioRecording);
+      }
     });
     
     function loadDashboardData() {
@@ -188,6 +202,372 @@
         tbody.innerHTML = html;
       }
     }
+
+    // --- Floating Seller Chat Widget Script Logic ---
+    let sellerActiveType = null;
+    let sellerActiveChannel = null;
+    let sellerChatPollInterval = null;
+    let sellerMediaRecorder = null;
+    let sellerAudioChunks = [];
+    let sellerIsRecording = false;
+
+    function toggleSellerChat() {
+      const panel = document.getElementById('sellerChatPanel');
+      const isVisible = panel.classList.contains('active');
+      if (isVisible) {
+        panel.classList.remove('active');
+        stopSellerPolling();
+      } else {
+        panel.classList.add('active');
+        showChannelSelection();
+      }
+    }
+
+    function showChannelSelection() {
+      sellerActiveType = null;
+      sellerActiveChannel = null;
+      stopSellerPolling();
+      
+      document.getElementById('sellerBackBtn').style.display = 'none';
+      document.getElementById('sellerChatTitle').innerText = 'تواصل مع الدعم / الإدارة';
+      document.getElementById('sellerChatFooter').style.display = 'none';
+      
+      const body = document.getElementById('sellerChatBody');
+      body.innerHTML = `
+        <div class="seller-channel-select">
+          <div class="seller-channel-option" onclick="startSellerChat('vendor_to_support', 'الدعم الفني')">
+            <i class="fas fa-headset"></i> تواصل مع الدعم الفني
+          </div>
+          <div class="seller-channel-option" onclick="startSellerChat('vendor_to_admin', 'السوبر أدمن')">
+            <i class="fas fa-user-shield"></i> تواصل مع السوبر أدمن
+          </div>
+          <div class="seller-channel-option" onclick="startSellerChat('vendor_to_customer_service', 'خدمة العملاء')">
+            <i class="fas fa-users-cog"></i> تواصل مع خدمة العملاء
+          </div>
+        </div>
+      `;
+    }
+
+    function startSellerChat(type, title) {
+      sellerActiveType = type;
+      document.getElementById('sellerBackBtn').style.display = 'block';
+      document.getElementById('sellerChatTitle').innerText = title;
+      document.getElementById('sellerChatFooter').style.display = 'flex';
+      
+      // Find or create channel
+      const channels = db.getTickets();
+      const existing = channels.find(c => c.type === type && c.status === 'open');
+      if (existing) {
+        sellerActiveChannel = existing;
+        loadSellerMessages();
+        startSellerPolling();
+      } else {
+        document.getElementById('sellerChatBody').innerHTML = `
+          <div style="text-align:center; padding: 3rem; color: #94a3b8;">
+            <i class="fas fa-comments" style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--admin-primary, #f97316);"></i>
+            <p>بدء محادثة جديدة مع ${title}. أرسل رسالة للبدء.</p>
+          </div>
+        `;
+      }
+    }
+
+    function loadSellerMessages() {
+      if (!sellerActiveChannel) return;
+      const body = document.getElementById('sellerChatBody');
+      const messages = db.getTicketMessages(sellerActiveChannel.id);
+      
+      const user = auth.getCurrentUser() || { id: 'vendor' };
+      let html = '';
+      
+      messages.forEach(msg => {
+        const isMe = msg.sender_id === user.id;
+        let audioHtml = '';
+        if (msg.audio_data) {
+          audioHtml = `
+            <div class="audio-player">
+              <audio src="${msg.audio_data}" controls></audio>
+            </div>
+          `;
+        }
+        
+        html += `
+          <div class="seller-msg ${isMe ? 'sent' : 'received'}">
+            <div style="font-weight:bold; font-size:0.75rem; margin-bottom: 2px;">${msg.sender_name}</div>
+            <div>${msg.message || ''}</div>
+            ${audioHtml}
+          </div>
+        `;
+      });
+      
+      const shouldScroll = body.scrollTop + body.clientHeight >= body.scrollHeight - 50;
+      body.innerHTML = html;
+      if (shouldScroll || body.innerHTML === html) {
+        body.scrollTop = body.scrollHeight;
+      }
+    }
+
+    function sendSellerMessage() {
+      const input = document.getElementById('sellerChatInput');
+      const text = input.value.trim();
+      if (!text && !sellerActiveChannel) return;
+      
+      if (!sellerActiveChannel) {
+        const title = document.getElementById('sellerChatTitle').innerText;
+        const ticket = db.createTicket({ type: sellerActiveType, subject: `تواصل البائع مع ${title}` });
+        if (ticket) {
+          sellerActiveChannel = ticket;
+          startSellerPolling();
+        }
+      }
+      
+      if (text && sellerActiveChannel) {
+        db.sendTicketMessage(sellerActiveChannel.id, { message: text });
+        input.value = '';
+        loadSellerMessages();
+      }
+    }
+
+    function startSellerPolling() {
+      if (sellerChatPollInterval) clearInterval(sellerChatPollInterval);
+      sellerChatPollInterval = setInterval(loadSellerMessages, 3000);
+    }
+
+    function stopSellerPolling() {
+      if (sellerChatPollInterval) {
+        clearInterval(sellerChatPollInterval);
+        sellerChatPollInterval = null;
+      }
+    }
+
+    function toggleSellerAudioRecording() {
+      const micBtn = document.getElementById('sellerMicBtn');
+      
+      if (!sellerIsRecording) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            sellerMediaRecorder = new MediaRecorder(stream);
+            sellerAudioChunks = [];
+            
+            sellerMediaRecorder.addEventListener("dataavailable", event => {
+              sellerAudioChunks.push(event.data);
+            });
+            
+            sellerMediaRecorder.addEventListener("stop", () => {
+              const audioBlob = new Blob(sellerAudioChunks, { type: 'audio/mp3' });
+              const reader = new FileReader();
+              reader.readAsDataURL(audioBlob);
+              reader.onloadend = () => {
+                const base64Audio = reader.result;
+                
+                if (!sellerActiveChannel) {
+                  const title = document.getElementById('sellerChatTitle').innerText;
+                  const ticket = db.createTicket({ type: sellerActiveType, subject: `تواصل البائع مع ${title}` });
+                  if (ticket) {
+                    sellerActiveChannel = ticket;
+                    startSellerPolling();
+                  }
+                }
+                
+                if (sellerActiveChannel) {
+                  db.sendTicketMessage(sellerActiveChannel.id, { audio_data: base64Audio });
+                  loadSellerMessages();
+                }
+              };
+            });
+            
+            sellerMediaRecorder.start();
+            sellerIsRecording = true;
+            micBtn.classList.add('recording');
+            micBtn.innerHTML = '<i class="fas fa-stop"></i>';
+          })
+          .catch(err => {
+            console.error(err);
+            alert('تعذر الوصول للميكروفون');
+          });
+      } else {
+        if (sellerMediaRecorder) {
+          sellerMediaRecorder.stop();
+          sellerMediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+        sellerIsRecording = false;
+        micBtn.classList.remove('recording');
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      }
+    }
   </script>
+
+  <!-- Floating Seller Chat Widget Markup -->
+  <style>
+    .seller-chat-widget {
+      position: fixed;
+      bottom: 25px;
+      left: 25px;
+      z-index: 1000;
+      font-family: 'Cairo', sans-serif;
+    }
+    .seller-chat-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--admin-primary, #f97316);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      transition: all 0.3s ease;
+    }
+    .seller-chat-btn:hover {
+      transform: scale(1.1);
+    }
+    .seller-chat-panel {
+      position: absolute;
+      bottom: 80px;
+      left: 0;
+      width: 360px;
+      height: 480px;
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(15px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .seller-chat-panel.active {
+      display: flex;
+    }
+    .seller-chat-header {
+      background: #0f172a;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .seller-chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .seller-channel-select {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding: 1rem;
+      height: 100%;
+      justify-content: center;
+    }
+    .seller-channel-option {
+      background: #0f172a;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1.05rem;
+    }
+    .seller-channel-option:hover {
+      background: var(--admin-primary, #f97316);
+      border-color: var(--admin-primary, #f97316);
+    }
+    .seller-msg {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-bottom: 5px;
+    }
+    .seller-msg.sent {
+      align-self: flex-end;
+      background: var(--admin-primary, #f97316);
+      color: #fff;
+    }
+    .seller-msg.received {
+      align-self: flex-start;
+      background: #334155;
+      color: #f1f5f9;
+    }
+    .seller-chat-footer {
+      padding: 0.75rem;
+      background: #0f172a;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .seller-chat-input {
+      flex: 1;
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #fff;
+      outline: none;
+      font-family: inherit;
+    }
+    .seller-voice-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #334155;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .seller-voice-btn.recording {
+      background: #ef4444;
+      animation: pulse-mic 1.2s infinite;
+    }
+    .audio-player audio {
+      width: 180px;
+      height: 30px;
+      margin-top: 5px;
+    }
+  </style>
+
+  <div class="seller-chat-widget">
+    <button class="seller-chat-btn" onclick="toggleSellerChat()"><i class="fas fa-comments"></i></button>
+    <div class="seller-chat-panel" id="sellerChatPanel">
+      <div class="seller-chat-header">
+        <button class="btn btn-ghost" id="sellerBackBtn" style="display:none; color:#fff; padding:0; font-size:1.2rem; min-width:auto;" onclick="showChannelSelection()"><i class="fas fa-arrow-right"></i></button>
+        <span id="sellerChatTitle" style="font-weight:bold; margin-right: 8px;">تواصل مع الدعم / الإدارة</span>
+      </div>
+      
+      <div class="seller-chat-body" id="sellerChatBody">
+        <!-- Injected by JS -->
+      </div>
+      
+      <div class="seller-chat-footer" id="sellerChatFooter" style="display:none;">
+        <input type="text" id="sellerChatInput" class="seller-chat-input" placeholder="اكتب رسالتك...">
+        <button class="seller-voice-btn" id="sellerMicBtn"><i class="fas fa-microphone"></i></button>
+        <button class="btn" style="background:var(--admin-primary); color:#fff; padding:6px 12px; min-width:auto;" onclick="sendSellerMessage()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
+

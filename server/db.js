@@ -16,7 +16,7 @@ async function initDatabase() {
   try {
     // Seed admin user if not exists
     const { data: adminExists, error: adminError } = await supabase
-      .from('users')
+      .from('ec_users')
       .select('id')
       .eq('id', 'admin')
       .single();
@@ -25,7 +25,7 @@ async function initDatabase() {
       console.error('❌ Error checking users table (admin):', adminError.message);
     } else if (!adminExists) {
       const hashedPwd = await bcrypt.hash('admin', 10);
-      const { error: seedError } = await supabase.from('users').upsert([{
+      const { error: seedError } = await supabase.from('ec_users').upsert([{
         id: 'admin',
         name: 'مدير النظام',
         email: 'admin@zayed.com',
@@ -40,11 +40,11 @@ async function initDatabase() {
     }
 
     // Seed vendors if not exist
-    const { data: vendors, error: vendorsError } = await supabase.from('vendors').select('id').limit(1);
+    const { data: vendors, error: vendorsError } = await supabase.from('ec_vendors').select('id').limit(1);
     if (vendorsError) {
       console.error('❌ Error checking vendors table:', vendorsError.message);
     } else if (!vendors || vendors.length === 0) {
-      const { error: seedError } = await supabase.from('vendors').upsert([
+      const { error: seedError } = await supabase.from('ec_vendors').upsert([
         { id: 'v1', name: 'محلات الهدى للإلكترونيات', contact: '0501234567', active: true },
         { id: 'v2', name: 'بوتيك الأناقة', contact: '0509876543', active: true }
       ], { onConflict: 'id' });
@@ -56,11 +56,11 @@ async function initDatabase() {
     }
 
     // Seed products if not exist
-    const { data: products, error: productsError } = await supabase.from('products').select('id').limit(1);
+    const { data: products, error: productsError } = await supabase.from('ec_products').select('id').limit(1);
     if (productsError) {
       console.error('❌ Error checking products table:', productsError.message);
     } else if (!products || products.length === 0) {
-      const { error: seedError } = await supabase.from('products').upsert([
+      const { error: seedError } = await supabase.from('ec_products').upsert([
         { id: 'p1', name: 'سماعات رأس لاسلكية Sony WH-1000XM4', description: 'سماعات رأس بخاصية إلغاء الضوضاء الرائدة في الصناعة.', price: 1200, oldPrice: 1500, category: 'electronics', image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=500&q=80', rating: 4.8, reviews: 124, badge: 'خصم 20%' },
         { id: 'p2', name: 'ساعة ذكية Apple Watch Series 8', description: 'ساعة أبل الذكية الأحدث مع مستشعر قياس الأكسجين.', price: 1800, oldPrice: null, category: 'electronics', image: 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?auto=format&fit=crop&w=500&q=80', rating: 4.9, reviews: 312, badge: 'جديد' },
         { id: 'p3', name: 'حقيبة ظهر جلدية فاخرة', description: 'حقيبة ظهر مصنوعة من الجلد الطبيعي عالية الجودة.', price: 350, oldPrice: 450, category: 'fashion', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=500&q=80', rating: 4.5, reviews: 89, badge: '' },
@@ -78,11 +78,11 @@ async function initDatabase() {
     }
 
     // Seed reviews if not exist
-    const { data: reviews, error: reviewsError } = await supabase.from('reviews').select('id').limit(1);
+    const { data: reviews, error: reviewsError } = await supabase.from('ec_reviews').select('id').limit(1);
     if (reviewsError) {
       console.error('❌ Error checking reviews table:', reviewsError.message);
     } else if (!reviews || reviews.length === 0) {
-      const { error: seedError } = await supabase.from('reviews').upsert([
+      const { error: seedError } = await supabase.from('ec_reviews').upsert([
         { id: 'r1', productId: 'p1', userName: 'أحمد الحربي', rating: 5, comment: 'سماعة رائعة جداً وعزل الضوضاء فيها ممتاز، أنصح بها بشدة!', date: new Date().toISOString() },
         { id: 'r2', productId: 'p1', userName: 'سارة المهيري', rating: 4, comment: 'جودة الصوت ممتازة والبطارية تدوم طويلاً، لكنها قد تكون ضاغطة قليلاً على الأذن بعد الاستخدام الطويل.', date: new Date().toISOString() },
         { id: 'r3', productId: 'p2', userName: 'محمد الفلاسي', rating: 5, comment: 'ساعة أبل الغنية عن التعريف، ميزات تتبع اللياقة البدنية والقلب دقيقة جداً.', date: new Date().toISOString() }
